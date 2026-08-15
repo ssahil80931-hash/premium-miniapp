@@ -3,97 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Store Mini App</title>
+    <title>Cyber Mini App Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --main-color: #00ff9d; }
+        :root { --neon: #00ff9d; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background: #07090e; color: #fff; padding: 15px; }
-
-        /* Animated Card Setup */
-        .product-card { background: #121721; border-radius: 16px; border: 1px solid #1e2636; overflow: hidden; margin-bottom: 20px; transition: 0.3s; }
-        .product-card.animated { animation: glowPulse 3s infinite alternate; }
+        body { background: #05070b; color: #fff; padding: 15px; position: relative; overflow-x: hidden; }
         
-        @keyframes glowPulse {
-            0% { border-color: #1e2636; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
-            100% { border-color: var(--main-color); box-shadow: 0 0 15px var(--main-color); }
-        }
+        #bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.3; pointer-events: none; }
+        
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); z-index: 9999; padding: 12px 24px; border-radius: 10px; font-weight: bold; font-size: 14px; opacity: 0; transition: all 0.4s ease; box-shadow: 0 0 20px rgba(0,0,0,0.8); width: 90%; max-width: 350px; text-align: center; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        video { width: 100%; height: 200px; object-fit: cover; background: #000; display: block; }
+        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 10px; background: #101520; border: 1px solid #1a2333; color: #fff; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .tab-btn.active { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 10px rgba(0,255,157,0.2); }
+
+        .card { background: rgba(16, 21, 32, 0.85); backdrop-filter: blur(10px); border-radius: 16px; border: 1px solid #1a2333; overflow: hidden; margin-bottom: 20px; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--neon), transparent); animation: lightning 2s infinite; }
+        @keyframes lightning { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .video-box { width: 100%; min-height: 200px; background: #000; position: relative; display: flex; align-items: center; justify-content: center; }
+        video { width: 100%; height: 100%; max-height: 350px; object-fit: contain; background: #000; }
+
         .details { padding: 15px; }
         .title { font-size: 18px; font-weight: bold; margin-bottom: 6px; }
-        .desc { font-size: 13px; color: #9ab0c7; margin-bottom: 15px; line-height: 1.4; }
-        .price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .price { font-size: 20px; font-weight: 800; color: var(--main-color); }
+        .desc { font-size: 13px; color: #8fa0b5; margin-bottom: 15px; line-height: 1.4; }
+        .price { font-size: 22px; font-weight: 800; color: var(--neon); text-shadow: 0 0 10px rgba(0,255,157,0.3); }
 
-        .buy-btn { background: var(--main-color); color: #000; font-weight: 800; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-size: 15px; text-transform: uppercase; }
-        
-        /* Modal Popup */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #161b26; border-radius: 16px; padding: 20px; text-align: center; max-width: 320px; border: 1px solid var(--main-color); }
-        .qr-img { width: 180px; height: 180px; border-radius: 10px; margin: 15px 0; border: 2px solid #fff; }
-        .close-btn { background: #ff4757; color: white; margin-top: 15px; }
+        .cyber-btn { background: var(--neon); color: #000; font-weight: 800; border: none; padding: 14px; width: 100%; border-radius: 10px; cursor: pointer; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.15s; box-shadow: 0 0 15px rgba(0,255,157,0.3); }
+        .cyber-btn:active { transform: scale(0.95); }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; z-index: 99; }
+        .modal-card { background: #101520; border: 1px solid var(--neon); border-radius: 16px; padding: 20px; text-align: center; width: 100%; max-width: 340px; box-shadow: 0 0 25px rgba(0,255,157,0.3); }
+        .qr-img { width: 180px; height: 180px; border-radius: 10px; margin: 10px 0; border: 2px solid var(--neon); }
+        input { width: 100%; padding: 10px; background: #05070b; border: 1px solid #1a2333; color: #fff; border-radius: 8px; margin: 10px 0; outline: none; }
     </style>
 </head>
 <body>
+    <canvas id="bgCanvas"></canvas>
+    <div id="userToast" class="toast"></div>
 
-    <div id="store-list"></div>
+    <div class="tab-bar">
+        <button class="tab-btn active" id="btn-store" onclick="showTab('store')">🛍️ Store</button>
+        <button class="tab-btn" id="btn-links" onclick="showTab('my-links')">🔑 My Access Links</button>
+    </div>
 
-    <!-- PAYMENT MODAL -->
+    <div id="store-tab">
+        <div id="store-list">Loading Cyber Products...</div>
+    </div>
+
+    <div id="links-tab" style="display:none;">
+        <div id="user-orders-list">Fetching your orders...</div>
+    </div>
+
     <div id="payModal" class="modal">
-        <div class="modal-content">
-            <h3>Complete Payment</h3>
+        <div class="modal-card">
+            <h3 style="color:var(--neon);">PAYMENT & ACCESS</h3>
             <img id="modalQr" class="qr-img" src="" alt="QR">
-            <p style="font-size:14px;">Pay via UPI ID:</p>
-            <strong id="modalUpi" style="color:var(--main-color); font-size:16px;"></strong>
-            <button class="buy-btn close-btn" onclick="closeModal()">Close</button>
+            
+            <p style="font-size:13px; color:#aaa; margin-bottom:4px;">UPI ID:</p>
+            <strong id="modalUpi" style="color:var(--neon); font-size:16px;"></strong>
+            
+            <p id="modalNote" style="font-size:12px; color:#8fa0b5; margin: 10px 0; border-top: 1px solid #1a2333; padding-top: 8px;"></p>
+            
+            <div style="margin-top:10px; text-align:left;">
+                <label style="font-size:12px; color:#aaa;">Enter 12-Digit UTR / Ref No:</label>
+                <input type="text" id="utrInput" placeholder="e.g. 423456789012">
+            </div>
+
+            <button class="cyber-btn" onclick="submitProof()">SUBMIT PAYMENT PROOF</button>
+            <button class="cyber-btn" style="background:#ff4757; color:#fff; margin-top:8px;" onclick="closeModal()">CANCEL</button>
         </div>
     </div>
 
     <script>
+        function showUserToast(msg, isError = false) {
+            const t = document.getElementById('userToast');
+            t.style.background = isError ? 'rgba(255, 71, 87, 0.95)' : 'rgba(0, 255, 157, 0.95)';
+            t.style.color = isError ? '#fff' : '#000';
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
         const tg = window.Telegram?.WebApp;
-        if(tg) tg.expand();
+        if(tg) { tg.expand(); tg.ready(); }
+        const userId = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "demo_user_123";
+        const userName = tg?.initDataUnsafe?.user?.first_name || "Guest User";
 
         let currentConfig = {};
+        let selectedProdId = null;
 
         async function loadStore() {
             const res = await fetch('/api/data');
             const data = await res.json();
             currentConfig = data.config;
+            document.documentElement.style.setProperty('--neon', currentConfig.theme_color);
 
-            // Theme Color Set
-            document.documentElement.style.setProperty('--main-color', currentConfig.theme_color);
-
-            const storeList = document.getElementById('store-list');
-            storeList.innerHTML = '';
-
+            const list = document.getElementById('store-list');
+            list.innerHTML = '';
+            
             data.products.forEach(p => {
-                const animClass = currentConfig.enable_animation ? 'animated' : '';
-                storeList.innerHTML += `
-                    <div class="product-card ${animClass}">
-                        <video src="${p.video_url}" autoplay loop muted playsinline></video>
+                let videoHtml = p.video_url 
+                    ? `<video src="${p.video_url}" controls autoplay loop muted playsinline webkit-playsinline preload="auto" onerror="this.parentElement.style.display='none'"></video>`
+                    : '';
+
+                list.innerHTML += `
+                    <div class="card">
+                        ${p.video_url ? `<div class="video-box">${videoHtml}</div>` : ''}
                         <div class="details">
                             <div class="title">${p.title}</div>
                             <div class="desc">${p.description}</div>
-                            <div class="price-row">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                                 <span class="price">₹${p.price}</span>
                             </div>
-                            <button class="buy-btn" onclick="openPayment('${p.title}', '${p.price}')">${p.btn_text}</button>
+                            <button class="cyber-btn" onclick="openPayment(${p.id})">${p.btn_text}</button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        function openPayment(title, price) {
+        function openPayment(id) {
+            selectedProdId = id;
             document.getElementById('modalQr').src = currentConfig.qr_image;
             document.getElementById('modalUpi').innerText = currentConfig.upi_id;
+            document.getElementById('modalNote').innerText = currentConfig.payment_note || "Scan QR code or use UPI ID to make payment.";
             document.getElementById('payModal').style.display = 'flex';
         }
 
-        function closeModal() {
-            document.getElementById('payModal').style.display = 'none';
+        function closeModal() { document.getElementById('payModal').style.display = 'none'; }
+
+        async function submitProof() {
+            const utr = document.getElementById('utrInput').value;
+            if(!utr) return showUserToast('Please enter UTR or Ref Number!', true);
+            
+            await fetch('/api/order/submit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ user_id: userId, user_name: userName, product_id: selectedProdId, utr_proof: utr })
+            });
+            showUserToast('Proof Submitted! Check "My Access Links" for approval.');
+            closeModal();
+            showTab('my-links');
         }
+
+        async function loadUserOrders() {
+            const res = await fetch(`/api/user/orders/${userId}`);
+            const data = await res.json();
+            const div = document.getElementById('user-orders-list');
+            div.innerHTML = '';
+            
+            if(data.orders.length === 0) div.innerHTML = '<p style="color:#777; text-align:center;">No purchases yet.</p>';
+
+            data.orders.forEach(o => {
+                let statusBadge = o.status === 'APPROVED' 
+                    ? `<a href="${o.link}" target="_blank" class="cyber-btn" style="display:block; text-align:center; text-decoration:none; margin-top:8px;">🚀 JOIN PRIVATE GROUP</a>`
+                    : `<span style="color:#ffb800; font-size:13px;">⏳ Status: ${o.status} (Verification in progress)</span>`;
+                
+                div.innerHTML += `
+                    <div class="card" style="padding:15px;">
+                        <strong style="font-size:16px;">${o.title}</strong> - ₹${o.price}<br>
+                        ${statusBadge}
+                    </div>
+                `;
+            });
+        }
+
+        function showTab(tab) {
+            document.getElementById('btn-store').classList.remove('active');
+            document.getElementById('btn-links').classList.remove('active');
+            if(tab === 'store') {
+                document.getElementById('btn-store').classList.add('active');
+                document.getElementById('store-tab').style.display = 'block';
+                document.getElementById('links-tab').style.display = 'none';
+            } else {
+                document.getElementById('btn-links').classList.add('active');
+                document.getElementById('store-tab').style.display = 'none';
+                document.getElementById('links-tab').style.display = 'block';
+                loadUserOrders();
+            }
+        }
+
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        let particles = Array.from({length: 25}, () => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*1.5, vy: (Math.random()-0.5)*1.5 }));
+
+        function drawCanvas() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.strokeStyle = currentConfig.theme_color || '#00ff9d';
+            ctx.fillStyle = currentConfig.theme_color || '#00ff9d';
+            
+            particles.forEach((p, i) => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x<0 || p.x>canvas.width) p.vx*=-1;
+                if(p.y<0 || p.y>canvas.height) p.vy*=-1;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
+                
+                for(let j=i+1; j<particles.length; j++){
+                    let p2 = particles[j];
+                    let dist = Math.hypot(p.x-p2.x, p.y-p2.y);
+                    if(dist < 90){
+                        ctx.lineWidth = 1 - dist/90;
+                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(drawCanvas);
+        }
+        drawCanvas();
 
         loadStore();
     </script>
