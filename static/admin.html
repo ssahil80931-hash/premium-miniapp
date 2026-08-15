@@ -3,170 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Control Admin Panel</title>
+    <title>Spider-Man Cyber Admin Portal</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background: #0b0e14; color: #fff; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { color: #00ff9d; margin-bottom: 20px; text-shadow: 0 0 10px rgba(0, 255, 157, 0.3); }
-        .card { background: #161b26; border: 1px solid #242c3d; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); transition: transform 0.2s; }
-        .card:hover { transform: translateY(-2px); }
-        h3 { color: #fff; margin-bottom: 15px; border-bottom: 1px solid #242c3d; padding-bottom: 8px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 13px; color: #8b9bb4; margin-bottom: 5px; }
-        input, textarea, select { width: 100%; padding: 12px; background: #0b0e14; border: 1px solid #242c3d; border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
-        input:focus, textarea:focus { border-color: #00ff9d; box-shadow: 0 0 8px rgba(0, 255, 157, 0.2); }
-        .row { display: flex; gap: 15px; }
-        .col { flex: 1; }
-        button { background: #00ff9d; color: #05080e; font-weight: 700; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; width: 100%; }
-        button:hover { background: #00e08b; box-shadow: 0 0 15px rgba(0,255,157,0.4); }
-        .btn-delete { background: #ff4757; color: white; margin-top: 10px; }
-        .btn-delete:hover { background: #ff6b81; box-shadow: 0 0 15px rgba(255,71,87,0.4); }
-        .product-item { background: #0b0e14; border: 1px solid #242c3d; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .checkbox-container { display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 10px; }
-        .checkbox-container input { width: auto; }
+        :root { --spidey-red: #ff0055; --spidey-blue: #00d2ff; --bg: #05060a; --card: #0d111a; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', monospace; }
+        body { background: var(--bg); color: #fff; min-height: 100vh; overflow-x: hidden; position: relative; }
+
+        #spiderCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+        /* LOGIN SCREEN STYLING */
+        .login-wrap { position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .login-card { background: rgba(13, 17, 26, 0.9); border: 2px solid var(--spidey-red); border-radius: 20px; padding: 35px 25px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px rgba(255, 0, 85, 0.4), inset 0 0 15px rgba(0, 210, 255, 0.2); animation: spideyPulse 3s infinite alternate; backdrop-filter: blur(10px); }
+
+        @keyframes spideyPulse {
+            0% { border-color: var(--spidey-red); box-shadow: 0 0 25px rgba(255, 0, 85, 0.4); }
+            100% { border-color: var(--spidey-blue); box-shadow: 0 0 35px rgba(0, 210, 255, 0.5); }
+        }
+
+        .spidey-logo { font-size: 45px; filter: drop-shadow(0 0 10px var(--spidey-red)); animation: floatLogo 2s infinite ease-in-out alternate; }
+        @keyframes floatLogo { 0% { transform: translateY(-5px); } 100% { transform: translateY(5px); } }
+
+        .login-card h2 { color: #fff; margin: 15px 0 25px; letter-spacing: 2px; text-shadow: 0 0 10px var(--spidey-blue); }
+        
+        .input-group { margin-bottom: 18px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; color: var(--spidey-blue); margin-bottom: 6px; font-weight: bold; letter-spacing: 1px; }
+        .input-group input { width: 100%; padding: 14px; background: #05070f; border: 1px solid #1a233a; border-radius: 10px; color: #fff; outline: none; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--spidey-red); box-shadow: 0 0 12px rgba(255,0,85,0.5); }
+
+        .spidey-btn { background: linear-gradient(45deg, var(--spidey-red), #b3003b); color: #fff; font-weight: 800; border: none; padding: 14px; width: 100%; border-radius: 10px; cursor: pointer; letter-spacing: 1.5px; text-transform: uppercase; transition: 0.2s; box-shadow: 0 0 15px rgba(255,0,85,0.4); }
+        .spidey-btn:hover { transform: scale(1.02); box-shadow: 0 0 25px var(--spidey-red); }
+        .spidey-btn:active { transform: scale(0.97); }
+
+        /* DASHBOARD STYLING */
+        .dash-wrap { position: relative; z-index: 10; max-width: 1000px; margin: 0 auto; padding: 20px; display: none; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid var(--spidey-red); padding-bottom: 12px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); border: 1px solid #1f293d; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 0 15px rgba(0,210,255,0.05); }
+        .stat-val { font-size: 28px; font-weight: 800; color: var(--spidey-blue); margin-top: 5px; }
+        
+        .card { background: var(--card); border: 1px solid #1f293d; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
+        h3 { color: #fff; margin-bottom: 15px; border-bottom: 1px solid #1f293d; padding-bottom: 8px; }
+        
+        input, textarea { width: 100%; padding: 12px; background: #05070f; border: 1px solid #1f293d; border-radius: 8px; color: #fff; margin-bottom: 12px; outline: none; }
+        .row { display: flex; gap: 15px; } .col { flex: 1; }
+        
+        .btn-approve { background: #00ff9d; color: #000; padding: 8px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-reject { background: #ff4757; color: #fff; padding: 8px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .order-row { background: #05070f; border: 1px solid #1f293d; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>⚡ Store Management Panel</h1>
+    <canvas id="spiderCanvas"></canvas>
 
-        <!-- GLOBAL CONFIGURATION -->
-        <div class="card">
-            <h3>⚙️ Global Settings & UI Appearance</h3>
-            <div class="row">
-                <div class="col form-group">
-                    <label>UPI ID (Payment)</label>
-                    <input type="text" id="upi_id" placeholder="e.g. user@upi">
-                </div>
-                <div class="col form-group">
-                    <label>QR Image Direct Link</label>
-                    <input type="text" id="qr_image" placeholder="https://image-url.com/qr.png">
-                </div>
+    <!-- SPIDER-MAN ANIMATED LOGIN PAGE -->
+    <div id="loginSection" class="login-wrap">
+        <div class="login-card">
+            <div class="spidey-logo">🕷️</div>
+            <h2>SPIDEY ADMIN ACCESS</h2>
+            <div class="input-group">
+                <label>USERNAME</label>
+                <input type="text" id="admin_user_input" placeholder="Enter Admin Username">
             </div>
-            <div class="row">
-                <div class="col form-group">
-                    <label>Theme Highlight Color</label>
-                    <input type="color" id="theme_color" value="#00ff9d" style="height:45px;">
-                </div>
-                <div class="col form-group">
-                    <label>Animations</label>
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="enable_animation" checked>
-                        <span>Enable Card Glow & Pulse Animations</span>
-                    </div>
-                </div>
+            <div class="input-group">
+                <label>PASSWORD</label>
+                <input type="password" id="admin_pass_input" placeholder="Enter Password">
             </div>
-            <button onclick="saveSettings()">UPDATE GLOBAL SETTINGS</button>
+            <button class="spidey-btn" onclick="attemptLogin()">AUTHENTICATE</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTROL DASHBOARD -->
+    <div id="dashSection" class="dash-wrap">
+        <div class="header">
+            <h1 style="color:var(--spidey-red); text-shadow: 0 0 10px var(--spidey-red);">🕷️ SPIDEY MASTER PANEL</h1>
+            <button class="spidey-btn" style="width:auto; padding:8px 15px; background:var(--spidey-blue);" onclick="logout()">LOGOUT</button>
         </div>
 
-        <!-- ADD NEW PRODUCT -->
-        <div class="card">
-            <h3>🛍️ Add New Product listing</h3>
-            <div class="form-group">
-                <label>Product Title</label>
-                <input type="text" id="p_title" placeholder="e.g. Premium VIP Pass">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div>TOTAL REVENUE</div>
+                <div class="stat-val" id="total_revenue">₹0</div>
             </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea id="p_desc" rows="3" placeholder="Explain product highlights..."></textarea>
+            <div class="stat-card">
+                <div>TOTAL CUSTOMERS</div>
+                <div class="stat-val" id="total_users">0</div>
             </div>
-            <div class="row">
-                <div class="col form-group">
-                    <label>Price (₹)</label>
-                    <input type="text" id="p_price" placeholder="999">
-                </div>
-                <div class="col form-group">
-                    <label>Button Text (Call To Action)</label>
-                    <input type="text" id="p_btn" placeholder="Buy Now / Get Access">
-                </div>
+            <div class="stat-card">
+                <div>PENDING PROOFS</div>
+                <div class="stat-val" id="pending_count" style="color:var(--spidey-red);">0</div>
             </div>
-            <div class="form-group">
-                <label>Preview Video Direct Link (.mp4 URL)</label>
-                <input type="text" id="p_video" placeholder="https://example.com/demo.mp4">
-            </div>
-            <button onclick="addProduct()">PUBLISH NEW PRODUCT</button>
         </div>
 
-        <!-- MANAGE PRODUCTS LIST -->
         <div class="card">
-            <h3>📦 Live Products List</h3>
-            <div id="products_list">Loading products...</div>
+            <h3>💳 Payment Approvals & Link Release</h3>
+            <div id="pending_orders_list">Loading...</div>
+        </div>
+
+        <div class="card">
+            <h3>🛍️ Add New Product</h3>
+            <input type="text" id="p_title" placeholder="Product Title">
+            <textarea id="p_desc" placeholder="Description"></textarea>
+            <div class="row">
+                <div class="col"><input type="text" id="p_price" placeholder="Price (₹)"></div>
+                <div class="col"><input type="text" id="p_btn" placeholder="Button Text"></div>
+            </div>
+            <input type="text" id="p_video" placeholder="Direct Video .mp4 URL">
+            <input type="text" id="p_link" placeholder="Private Telegram Group / Access Link">
+            <button class="spidey-btn" onclick="addProduct()">PUBLISH PRODUCT</button>
+        </div>
+
+        <div class="card">
+            <h3>⚙️ Credentials & Store Settings</h3>
+            <div class="row">
+                <div class="col"><input type="text" id="adm_user" placeholder="Admin Username"></div>
+                <div class="col"><input type="text" id="adm_pass" placeholder="Admin Password"></div>
+            </div>
+            <div class="row">
+                <div class="col"><input type="text" id="upi_id" placeholder="UPI ID"></div>
+                <div class="col"><input type="text" id="qr_image" placeholder="QR Direct Link"></div>
+            </div>
+            <div class="row">
+                <div class="col"><input type="color" id="theme_color" value="#00ff9d" style="height:45px;"></div>
+                <div class="col"><button class="spidey-btn" onclick="saveSettings()" style="margin-top:2px;">UPDATE CREDENTIALS & CONFIG</button></div>
+            </div>
         </div>
     </div>
 
     <script>
-        async function loadAdminData() {
-            const res = await fetch('/api/data');
+        // SPIDER-MAN WEB LIGHTS ANIMATION (CANVAS)
+        const canvas = document.getElementById('spiderCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        
+        let nodes = Array.from({length: 45}, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: (Math.random() - 0.5) * 1.5,
+            color: Math.random() > 0.5 ? '#ff0055' : '#00d2ff'
+        }));
+
+        function drawSpiderWeb() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            nodes.forEach((n, i) => {
+                n.x += n.vx; n.y += n.vy;
+                if(n.x<0 || n.x>canvas.width) n.vx*=-1;
+                if(n.y<0 || n.y>canvas.height) n.vy*=-1;
+                
+                ctx.beginPath(); ctx.arc(n.x, n.y, 3, 0, Math.PI*2);
+                ctx.fillStyle = n.color; ctx.fill();
+
+                for(let j=i+1; j<nodes.length; j++){
+                    let n2 = nodes[j];
+                    let dist = Math.hypot(n.x-n2.x, n.y-n2.y);
+                    if(dist < 130){
+                        ctx.lineWidth = 1 - dist/130;
+                        ctx.strokeStyle = n.color;
+                        ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(n2.x, n2.y); ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(drawSpiderWeb);
+        }
+        drawSpiderWeb();
+
+        // AUTH & DASHBOARD LOGIC
+        async function attemptLogin() {
+            const u = document.getElementById('admin_user_input').value;
+            const p = document.getElementById('admin_pass_input').value;
+            
+            const res = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username: u, password: p})
+            });
             const data = await res.json();
             
-            // Populate config
-            document.getElementById('upi_id').value = data.config.upi_id;
-            document.getElementById('qr_image').value = data.config.qr_image;
-            document.getElementById('theme_color').value = data.config.theme_color;
-            document.getElementById('enable_animation').checked = data.config.enable_animation;
+            if(data.status === 'success') {
+                localStorage.setItem('spidey_token', data.token);
+                showDashboard();
+            } else {
+                alert('Access Denied: Wrong Username or Password!');
+            }
+        }
 
-            // Render live products
-            const listDiv = document.getElementById('products_list');
-            listDiv.innerHTML = '';
+        function checkAuth() {
+            if(localStorage.getItem('spidey_token')) showDashboard();
+        }
+
+        function logout() {
+            localStorage.removeItem('spidey_token');
+            document.getElementById('dashSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'flex';
+        }
+
+        async function showDashboard() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('dashSection').style.display = 'block';
             
-            data.products.forEach(p => {
-                listDiv.innerHTML += `
-                    <div class="product-item">
+            const res = await fetch('/api/admin/dashboard');
+            const data = await res.json();
+            
+            document.getElementById('total_revenue').innerText = '₹' + data.revenue;
+            document.getElementById('total_users').innerText = data.total_users;
+            document.getElementById('pending_count').innerText = data.pending_orders.length;
+            document.getElementById('adm_user').value = data.admin_user;
+            document.getElementById('adm_pass').value = data.admin_pass;
+
+            const list = document.getElementById('pending_orders_list');
+            list.innerHTML = '';
+            if(data.pending_orders.length === 0) list.innerHTML = '<div style="color:#777;">No pending payment approvals.</div>';
+
+            data.pending_orders.forEach(o => {
+                list.innerHTML += `
+                    <div class="order-row">
                         <div>
-                            <strong>${p.title}</strong> - ₹${p.price}<br>
-                            <small style="color:#8b9bb4;">Button: "${p.btn_text}" | Video: ${p.video_url.substring(0,30)}...</small>
+                            <strong>${o.user_name}</strong> (ID: ${o.user_id})<br>
+                            <small>Item: ${o.title} | ₹${o.price}</small><br>
+                            <small style="color:var(--spidey-blue);">UTR: <b>${o.utr}</b></small>
                         </div>
-                        <button class="btn-delete" style="width: auto; padding: 6px 12px;" onclick="deleteProduct(${p.id})">Delete</button>
+                        <div>
+                            <button class="btn-approve" onclick="approveOrder(${o.id})">APPROVE</button>
+                            <button class="btn-reject" onclick="rejectOrder(${o.id})">REJECT</button>
+                        </div>
                     </div>
                 `;
             });
+
+            const cfgRes = await fetch('/api/data');
+            const cfgData = await cfgRes.json();
+            document.getElementById('upi_id').value = cfgData.config.upi_id;
+            document.getElementById('qr_image').value = cfgData.config.qr_image;
+            document.getElementById('theme_color').value = cfgData.config.theme_color;
         }
 
-        async function saveSettings() {
-            const settings = {
-                upi_id: document.getElementById('upi_id').value,
-                qr_image: document.getElementById('qr_image').value,
-                theme_color: document.getElementById('theme_color').value,
-                enable_animation: document.getElementById('enable_animation').checked
-            };
-            await fetch('/api/admin/update-settings', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(settings)
-            });
-            alert('Settings Updated!');
-            loadAdminData();
+        async function approveOrder(id) {
+            await fetch('/api/admin/approve-order', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({order_id: id}) });
+            showDashboard();
+        }
+
+        async function rejectOrder(id) {
+            await fetch('/api/admin/reject-order', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({order_id: id}) });
+            showDashboard();
         }
 
         async function addProduct() {
-            const product = {
+            const p = {
                 title: document.getElementById('p_title').value,
                 description: document.getElementById('p_desc').value,
                 price: document.getElementById('p_price').value,
                 btn_text: document.getElementById('p_btn').value,
-                video_url: document.getElementById('p_video').value
+                video_url: document.getElementById('p_video').value,
+                group_link: document.getElementById('p_link').value
             };
-            await fetch('/api/admin/save-product', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(product)
-            });
+            await fetch('/api/admin/save-product', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(p) });
             alert('Product Published!');
-            loadAdminData();
+            showDashboard();
         }
 
-        async function deleteProduct(id) {
-            if(!confirm('Are you sure you want to delete this product?')) return;
-            await fetch('/api/admin/delete-product', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({id: id})
-            });
-            loadAdminData();
+        async function saveSettings() {
+            const s = {
+                upi_id: document.getElementById('upi_id').value,
+                qr_image: document.getElementById('qr_image').value,
+                theme_color: document.getElementById('theme_color').value,
+                enable_animation: true,
+                admin_user: document.getElementById('adm_user').value,
+                admin_pass: document.getElementById('adm_pass').value
+            };
+            await fetch('/api/admin/update-settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(s) });
+            alert('Settings & Password Updated!');
         }
 
-        loadAdminData();
+        checkAuth();
     </script>
 </body>
 </html>
