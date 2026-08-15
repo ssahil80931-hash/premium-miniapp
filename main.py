@@ -17,7 +17,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- DATABASE SETUP ---
 DB_FILE = "store_database.db"
 
 def init_db():
@@ -38,23 +37,30 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS config (
                     id INTEGER PRIMARY KEY, upi_id TEXT, qr_image TEXT,
                     theme_color TEXT, enable_animation INTEGER,
-                    admin_user TEXT, admin_pass TEXT)''')
+                    admin_user TEXT, admin_pass TEXT, payment_note TEXT)''')
     
+    try:
+        c.execute("ALTER TABLE config ADD COLUMN payment_note TEXT DEFAULT 'Scan QR code and complete payment. Enter UTR below for instant verification.'")
+    except:
+        pass
+
     c.execute("SELECT COUNT(*) FROM config")
     if c.fetchone()[0] == 0:
-        c.execute("INSERT INTO config VALUES (1, 'merchant@upi', 'https://via.placeholder.com/250', '#00ff9d', 1, 'admin', 'admin123')")
+        c.execute("""INSERT INTO config VALUES 
+                     (1, 'merchant@upi', 'https://via.placeholder.com/250', '#00ff9d', 1, 'admin', 'admin123', 
+                     'Scan QR code and complete payment. Enter UTR below for instant verification.')""")
     
     conn.commit()
     conn.close()
 
 init_db()
 
-# --- PYDANTIC SCHEMAS ---
 class LoginSchema(BaseModel):
     username: str
     password: str
 
 class ProductSchema(BaseModel):
+    id: Optional[int] = None
     title: str
     description: str
     price: str
@@ -78,11 +84,11 @@ class SettingsSchema(BaseModel):
     enable_animation: bool
     admin_user: str
     admin_pass: str
+    payment_note: str
 
 class DeleteProductSchema(BaseModel):
     id: int
 
-# --- FRONTEND ROUTES ---
 @app.get("/")
 async def serve_store():
     return FileResponse("static/index.html")
@@ -93,7 +99,6 @@ async def serve_admin():
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# --- AUTH ROUTE ---
 @app.post("/api/admin/login")
 async def admin_login(creds: LoginSchema):
     conn = sqlite3.connect(DB_FILE)
@@ -105,17 +110,22 @@ async def admin_login(creds: LoginSchema):
         return {"status": "success", "token": "SPIDEY_SECURE_AUTH_8891"}
     return {"status": "error", "message": "Invalid Username or Password!"}
 
-# --- PUBLIC STORE APIS ---
 @app.get("/api/data")
 async def get_data():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT upi_id, qr_image, theme_color, enable_animation FROM config WHERE id=1")
+    c.execute("SELECT upi_id, qr_image, theme_color, enable_animation, payment_note FROM config WHERE id=1")
     cfg = c.fetchone()
-    c.execute("SELECT id, title, description, price, btn_text, video_url FROM products")
-    products = [{"id": r[0], "title": r[1], "description": r[2], "price": r[3], "btn_text": r[4], "video_url": r[5]} for r in c.fetchall()]
+    c.execute("SELECT id, title, description, price, btn_text, video_url, group_link FROM products")
+    products = [{"id": r[0], "title": r[1], "description": r[2], "price": r[3], "btn_text": r[4], "video_url": r[5], "group_link": r[6]} for r in c.fetchall()]
     conn.close()
-    return {"config": {"upi_id": cfg[0], "qr_image": cfg[1], "theme_color": cfg[2], "enable_animation": bool(cfg[3])}, "products": products}
+    return {
+        "config": {
+            "upi_id": cfg[0], "qr_image": cfg[1], "theme_color": cfg[2], 
+            "enable_animation": bool(cfg[3]), "payment_note": cfg[4] or ""
+        }, 
+        "products": products
+    }
 
 @app.post("/api/order/submit")
 async def submit_order(order: OrderSubmitSchema):
@@ -142,7 +152,6 @@ async def get_user_orders(user_id: str):
     conn.close()
     return {"orders": orders}
 
-# --- ADMIN DASHBOARD APIS ---
 @app.get("/api/admin/dashboard")
 async def get_dashboard():
     conn = sqlite3.connect(DB_FILE)
@@ -153,10 +162,22 @@ async def get_dashboard():
     total_users = c.fetchone()[0] or 0
     c.execute("SELECT id, user_id, user_name, product_title, price, utr_proof FROM orders WHERE status='PENDING'")
     pending = [{"id": r[0], "user_id": r[1], "user_name": r[2], "title": r[3], "price": r[4], "utr": r[5]} for r in c.fetchall()]
-    c.execute("SELECT admin_user, admin_pass FROM config WHERE id=1")
+    
+    c.execute("SELECT id, title, description, price, btn_text, video_url, group_link FROM products")
+    products = [{"id": r[0], "title": r[1], "description": r[2], "price": r[3], "btn_text": r[4], "video_url": r[5], "group_link": r[6]} for r in c.fetchall()]
+    
+    c.execute("SELECT admin_user, admin_pass, payment_note FROM config WHERE id=1")
     adm = c.fetchone()
     conn.close()
-    return {"revenue": revenue, "total_users": total_users, "pending_orders": pending, "admin_user": adm[0], "admin_pass": adm[1]}
+    return {
+        "revenue": revenue, 
+        "total_users": total_users, 
+        "pending_orders": pending, 
+        "products": products,
+        "admin_user": adm[0], 
+        "admin_pass": adm[1],
+        "payment_note": adm[2] or ""
+    }
 
 @app.post("/api/admin/approve-order")
 async def approve_order(action: OrderActionSchema):
@@ -180,8 +201,14 @@ async def reject_order(action: OrderActionSchema):
 async def save_product(product: ProductSchema):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("INSERT INTO products (title, description, price, btn_text, video_url, group_link) VALUES (?, ?, ?, ?, ?, ?)",
-              (product.title, product.description, product.price, product.btn_text, product.video_url, product.group_link))
+    if product.id:
+        c.execute("""UPDATE products SET title=?, description=?, price=?, btn_text=?, video_url=?, group_link=? 
+                     WHERE id=?""",
+                  (product.title, product.description, product.price, product.btn_text, product.video_url, product.group_link, product.id))
+    else:
+        c.execute("""INSERT INTO products (title, description, price, btn_text, video_url, group_link) 
+                     VALUES (?, ?, ?, ?, ?, ?)""",
+                  (product.title, product.description, product.price, product.btn_text, product.video_url, product.group_link))
     conn.commit()
     conn.close()
     return {"status": "success"}
@@ -199,8 +226,10 @@ async def delete_product(data: DeleteProductSchema):
 async def update_settings(settings: SettingsSchema):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("UPDATE config SET upi_id=?, qr_image=?, theme_color=?, enable_animation=?, admin_user=?, admin_pass=? WHERE id=1",
-              (settings.upi_id, settings.qr_image, settings.theme_color, int(settings.enable_animation), settings.admin_user, settings.admin_pass))
+    c.execute("""UPDATE config SET upi_id=?, qr_image=?, theme_color=?, enable_animation=?, 
+                 admin_user=?, admin_pass=?, payment_note=? WHERE id=1""",
+              (settings.upi_id, settings.qr_image, settings.theme_color, int(settings.enable_animation), 
+               settings.admin_user, settings.admin_pass, settings.payment_note))
     conn.commit()
     conn.close()
     return {"status": "success"}
