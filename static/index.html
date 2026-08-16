@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Velvet Club VIP Store</title>
+    <title>VIP Video Vault</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-deep: #0b0710;
-            --bg-card: rgba(25, 17, 36, 0.75);
-            --accent-rose: #ff2a85;
-            --accent-purple: #9d4edd;
-            --text-main: #f3e8ff;
-            --text-sub: #b8a9c9;
-            --border-glow: rgba(255, 42, 133, 0.3);
+            --bg-deep: #05070b;
+            --bg-card: #0e131f;
+            --accent: #00ff88;
+            --accent-glow: rgba(0, 255, 136, 0.25);
+            --text-main: #ffffff;
+            --text-sub: #9ca3af;
+            --border: #1f2937;
         }
 
         * {
@@ -26,7 +26,6 @@
 
         body {
             background-color: var(--bg-deep);
-            background-image: radial-gradient(circle at 50% 0%, #24113c 0%, var(--bg-deep) 70%);
             color: var(--text-main);
             min-height: 100vh;
             /* Jelly Elastic Smooth Momentum Scrolling */
@@ -34,18 +33,18 @@
             -webkit-overflow-scrolling: touch;
             scroll-behavior: smooth;
             padding: 16px;
-            padding-bottom: 50px;
+            padding-bottom: 60px;
         }
 
         .container {
             max-width: 440px;
             margin: 0 auto;
-            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fadeIn 0.4s ease-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .header {
@@ -54,114 +53,132 @@
             padding-top: 10px;
         }
 
-        .logo-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-rose), var(--accent-purple));
-            box-shadow: 0 0 25px rgba(255, 42, 133, 0.5);
-            margin-bottom: 12px;
-            font-size: 26px;
-            animation: pulseJelly 3s infinite ease-in-out;
-        }
-
-        @keyframes pulseJelly {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 42, 133, 0.4); }
-            50% { transform: scale(1.06); box-shadow: 0 0 35px rgba(255, 42, 133, 0.7); }
+        .logo-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
         }
 
         h1 {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
-            letter-spacing: 1px;
-            background: linear-gradient(90deg, #ff70a6, #ff2a85, #d946ef);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            color: #fff;
             margin-bottom: 4px;
         }
 
         p.subtitle {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-sub);
         }
 
-        /* Jelly Card Effect on Touch */
+        /* Clean Modern Card */
         .card {
             background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border-glow);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 18px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .card:active {
-            transform: scale(0.97); /* Jelly squeeze feeling */
+            transform: scale(0.98); /* Jelly touch squeeze */
+        }
+
+        /* Video Box */
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            height: 210px;
+            background: #000;
+        }
+
+        .video-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Automatic Text Overlay on Video */
+        .video-overlay-text {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        .card-body {
+            padding: 16px;
         }
 
         .product-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .product-price {
-            background: rgba(255, 42, 133, 0.15);
-            color: #ff70a6;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 15px;
-            font-weight: 800;
-            border: 1px solid rgba(255, 42, 133, 0.3);
+            margin-bottom: 6px;
         }
 
         .product-desc {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-sub);
-            line-height: 1.5;
+            line-height: 1.4;
             margin-bottom: 14px;
         }
 
-        .badge-tag {
-            display: inline-block;
-            font-size: 11px;
-            background: rgba(157, 78, 221, 0.2);
-            color: #d8b4fe;
-            padding: 3px 8px;
-            border-radius: 6px;
+        .price-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 14px;
-            border: 1px solid rgba(157, 78, 221, 0.3);
+        }
+
+        .product-price {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .badge-tag {
+            font-size: 11px;
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            font-weight: 600;
         }
 
         .btn {
             width: 100%;
             padding: 13px;
-            border-radius: 14px;
+            border-radius: 12px;
             border: none;
-            background: linear-gradient(135deg, var(--accent-rose), var(--accent-purple));
-            color: white;
-            font-weight: 700;
-            font-size: 14px;
+            background: var(--accent);
+            color: #05070b;
+            font-weight: 800;
+            font-size: 13px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 42, 133, 0.4);
-            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+            box-shadow: 0 4px 15px var(--accent-glow);
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
             text-align: center;
             display: block;
             text-decoration: none;
         }
 
         .btn:active {
-            transform: scale(0.94); /* Bouncy Jelly Click */
+            transform: scale(0.95);
         }
 
         /* Modal Sheet */
@@ -169,40 +186,28 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 3, 8, 0.85);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(8px);
             z-index: 100;
             justify-content: center;
             align-items: flex-end;
-            animation: fadeInModal 0.3s ease;
-        }
-
-        @keyframes fadeInModal {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
 
         .modal-content {
-            background: #150d22;
-            border: 1px solid var(--border-glow);
+            background: #0e131f;
+            border: 1px solid var(--border);
             width: 100%;
             max-width: 440px;
             border-radius: 24px 24px 0 0;
             padding: 24px;
             max-height: 90vh;
             overflow-y: auto;
-            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
         }
 
         .modal-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             color: #fff;
             display: flex;
             justify-content: space-between;
@@ -213,42 +218,40 @@
             background: none;
             border: none;
             color: var(--text-sub);
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
         }
 
         .input-field {
             width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #05070b;
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 12px 14px;
             color: #fff;
             font-size: 14px;
             margin-bottom: 14px;
             outline: none;
-            transition: border-color 0.2s;
         }
 
         .input-field:focus {
-            border-color: var(--accent-rose);
+            border-color: var(--accent);
         }
 
         .upi-box {
-            background: rgba(255, 42, 133, 0.08);
-            border: 1px dashed var(--accent-rose);
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px dashed var(--accent);
             padding: 12px;
             border-radius: 12px;
             text-align: center;
             margin-bottom: 14px;
-            font-size: 14px;
         }
 
         .loading, .error-state {
             text-align: center;
             padding: 40px;
             color: var(--text-sub);
-            font-size: 14px;
+            font-size: 13px;
         }
     </style>
 </head>
@@ -256,13 +259,13 @@
 
     <div class="container">
         <div class="header">
-            <div class="logo-badge">💋</div>
-            <h1>VELVET CLUB</h1>
-            <p class="subtitle">Exclusive VIP Private Passes & Community</p>
+            <div class="logo-icon">🔥</div>
+            <h1>VIP VIDEO VAULT</h1>
+            <p class="subtitle">Watch Demo Preview & Get Instant Access</p>
         </div>
 
         <div id="store-container">
-            <div class="loading">Loading velvet experience...</div>
+            <div class="loading">Loading videos...</div>
         </div>
     </div>
 
@@ -274,13 +277,13 @@
                 <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
             <div class="upi-box">
-                <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 4px;">Send payment to UPI ID:</div>
-                <strong id="displayUpi" style="color: #ff70a6; font-size: 16px; user-select: all;">loading...</strong>
+                <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 4px;">Pay to UPI ID:</div>
+                <strong id="displayUpi" style="color: var(--accent); font-size: 15px; user-select: all;">loading...</strong>
             </div>
-            <p id="paymentNote" class="product-desc" style="font-size: 12px; text-align: center; margin-bottom: 14px;"></p>
+            <p id="paymentNote" class="product-desc" style="font-size: 11px; text-align: center; margin-bottom: 14px;"></p>
             
             <div style="margin-bottom: 14px;">
-                <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 6px;">Enter 12-Digit UTR / Transaction ID:</label>
+                <label style="font-size: 11px; color: var(--text-sub); display: block; margin-bottom: 6px;">Enter 12-Digit UTR / Transaction ID:</label>
                 <input type="text" id="utrInput" class="input-field" placeholder="e.g. 4352xxxxxxxx">
             </div>
 
@@ -291,9 +294,9 @@
     <!-- Success Modal -->
     <div id="successModal" class="modal">
         <div class="modal-content" style="text-align: center;">
-            <div style="font-size: 40px; margin-bottom: 10px;">🎉</div>
-            <h2 style="color: #fff; margin-bottom: 8px;">Payment Under Review</h2>
-            <p class="product-desc" style="margin-bottom: 20px;">Admin will verify your UTR shortly. Once approved, your VIP Telegram link will unlock automatically right here!</p>
+            <div style="font-size: 36px; margin-bottom: 10px;">🎉</div>
+            <h2 style="color: #fff; font-size: 18px; margin-bottom: 6px;">Payment Under Review</h2>
+            <p class="product-desc" style="margin-bottom: 20px;">Admin will verify your UTR shortly. Your private group link will unlock automatically right here!</p>
             <button class="btn" onclick="closeModal()">OKAY</button>
         </div>
     </div>
@@ -322,21 +325,36 @@
         function renderStore() {
             let container = document.getElementById('store-container');
             if (!productsData.length) {
-                container.innerHTML = '<div class="error-state">No VIP passes available right now.</div>';
+                container.innerHTML = '<div class="error-state">No videos available right now.</div>';
                 return;
             }
 
             let html = '';
             productsData.forEach(p => {
+                let videoHtml = p.video_url ? `
+                    <div class="video-wrapper">
+                        <video src="${p.video_url}" autoplay muted loop playsinline></video>
+                        <div class="video-overlay-text">Want full video? Get Access below 🚀</div>
+                    </div>
+                ` : `
+                    <div class="video-wrapper" style="display:flex; align-items:center; justify-content:center; background:#080b11; color:#9ca3af; font-size:12px;">
+                        <span>🎬 Video Preview</span>
+                        <div class="video-overlay-text">Want full video? Get Access below 🚀</div>
+                    </div>
+                `;
+
                 html += `
                     <div class="card">
-                        <div class="product-title">
-                            <span>${p.title}</span>
-                            <span class="product-price">₹${p.price}</span>
+                        ${videoHtml}
+                        <div class="card-body">
+                            <div class="product-title">${p.title}</div>
+                            <div class="product-desc">${p.description || ''}</div>
+                            <div class="price-row">
+                                <span class="product-price">₹${p.price}</span>
+                                <span class="badge-tag">⏳ ${p.day_access || 'Lifetime'}</span>
+                            </div>
+                            <button class="btn" onclick="openCheckout(${p.id})">${p.btn_text || 'GET INSTANT ACCESS 🚀'}</button>
                         </div>
-                        <div class="badge-tag">⏳ Access: ${p.day_access || 'Lifetime'}</div>
-                        <div class="product-desc">${p.description || ''}</div>
-                        <button class="btn" onclick="openCheckout(${p.id})">${p.btn_text || 'UNLOCK ACCESS 💋'}</button>
                     </div>
                 `;
             });
@@ -349,7 +367,7 @@
             if (!prod) return;
 
             document.getElementById('modalProdTitle').innerText = prod.title;
-            document.getElementById('displayUpi').innerText = globalConfig.upi_id || 'clubmaza@upi';
+            document.getElementById('displayUpi').innerText = globalConfig.upi_id || '';
             document.getElementById('paymentNote').innerText = globalConfig.payment_note || '';
             document.getElementById('payModal').style.display = 'flex';
         }
@@ -400,10 +418,10 @@
                 if (data.status === 'approved' && data.group_link) {
                     document.getElementById('store-container').innerHTML = `
                         <div class="card" style="text-align: center; padding: 30px;">
-                            <div style="font-size: 45px; margin-bottom: 12px;">👑</div>
-                            <h2 style="color: #fff; margin-bottom: 8px;">VIP Access Unlocked!</h2>
-                            <p class="product-desc" style="margin-bottom: 20px;">Your payment has been verified. Join the private velvet channel below:</p>
-                            <a href="${data.group_link}" target="_blank" class="btn">JOIN VIP TELEGRAM CHANNEL 🚀</a>
+                            <div style="font-size: 40px; margin-bottom: 10px;">👑</div>
+                            <h2 style="color: #fff; font-size: 18px; margin-bottom: 6px;">VIP Access Unlocked!</h2>
+                            <p class="product-desc" style="margin-bottom: 20px;">Your payment has been verified. Join the private channel below:</p>
+                            <a href="${data.group_link}" target="_blank" class="btn">JOIN VIP CHANNEL NOW 🚀</a>
                         </div>
                     `;
                 }
