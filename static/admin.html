@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baba Jadugar Panel</title>
+    <style>
+        :root {
+            --bg: #08080d;
+            --sidebar: #0f0f16;
+            --card: #15151f;
+            --card2: #1c1c28;
+            --gold: #f5c542;
+            --gold-dim: rgba(245,197,66,0.15);
+            --green: #00e676;
+            --blue: #4facfe;
+            --red: #ff4757;
+            --text: #eeeef5;
+            --muted: #8b8ba0;
+            --border: rgba(255,255,255,0.07);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+        .logo {
+            font-size: 1.15rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--gold), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .logo-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 32px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: var(--muted);
+            cursor: pointer;
+            margin-bottom: 6px;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: var(--gold-dim);
+            color: var(--gold);
+        }
+        .nav-item span { font-size: 1.15rem; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .main {
+            flex: 1;
+            margin-left: 260px;
+            padding: 28px 32px;
+            min-height: 100vh;
+        }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), var(--green));
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-value {
+            font-size: 1.7rem;
+            font-weight: 800;
+        }
+        .stat-value.green { color: var(--green); }
+        .stat-value.gold { color: var(--gold); }
+        .stat-value.blue { color: var(--blue); }
+
+        .table-wrap {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        th {
+            background: rgba(255,255,255,0.03);
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-pending { background: rgba(245,197,66,0.15); color: var(--gold); }
+        .badge-approved { background: rgba(0,230,118,0.15); color: var(--green); }
+        .badge-rejected { background: rgba(255,71,87,0.15); color: var(--red); }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), #e6a800);
+            color: #000;
+        }
+        .btn-success {
+            background: rgba(0,230,118,0.15);
+            color: var(--green);
+            border: 1px solid rgba(0,230,118,0.3);
+        }
+        .btn-danger {
+            background: rgba(255,71,87,0.15);
+            color: var(--red);
+            border: 1px solid rgba(255,71,87,0.3);
+        }
+        .btn-ghost {
+            background: rgba(255,255,255,0.06);
+            color: var(--text);
+        }
+        .btn:hover { transform: translateY(-1px); opacity: 0.9; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.3);
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--gold);
+        }
+        .form-group textarea { min-height: 90px; resize: vertical; }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .login-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+        .login-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+        .login-box h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, var(--gold), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .login-box p {
+            color: var(--muted);
+            margin-bottom: 28px;
+            font-size: 0.9rem;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            outline: none;
+        }
+        .login-box input:focus { border-color: var(--gold); }
+        .login-box button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--gold), #e6a800);
+            color: #000;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 900px) {
+            .sidebar { width: 70px; padding: 16px 8px; }
+            .logo, .logo-sub, .nav-item span:last-child { display: none; }
+            .main { margin-left: 70px; padding: 20px 16px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <h1>Baba Jadugar Panel</h1>
+            <p>Premium Control Center</p>
+            <input type="password" id="loginPassword" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()">
+            <button onclick="doLogin()">Enter Panel</button>
+            <p style="margin-top:16px;font-size:0.8rem;color:#666;" id="loginError"></p>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo">Baba Jadugar</div>
+        <div class="logo-sub">Premium Panel</div>
+
+        <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+            <span>📊</span> <span>Dashboard</span>
+        </div>
+        <div class="nav-item" data-page="products" onclick="showPage('products')">
+            <span>🎬</span> <span>Products</span>
+        </div>
+        <div class="nav-item" data-page="orders" onclick="showPage('orders')">
+            <span>💳</span> <span>Orders / UTR</span>
+        </div>
+        <div class="nav-item" data-page="settings" onclick="showPage('settings')">
+            <span>⚙️</span> <span>Settings</span>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="nav-item" onclick="doLogout()">
+                <span>🚪</span> <span>Logout</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main" id="mainContent">
+        <!-- Dashboard -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-title">Dashboard</div>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-label">Today Earning</div>
+                    <div class="stat-value green" id="statToday">₹0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">1 Week Earning</div>
+                    <div class="stat-value gold" id="statWeek">₹0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Earning</div>
+                    <div class="stat-value" id="statTotal">₹0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pending UTRs</div>
+                    <div class="stat-value blue" id="statPending">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Views</div>
+                    <div class="stat-value" id="statViews">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Products</div>
+                    <div class="stat-value" id="statProducts">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products -->
+        <div class="page" id="page-products">
+            <div class="page-title">
+                Products
+                <button class="btn btn-primary" onclick="openProductForm()">+ Add Product</button>
+            </div>
+
+            <div class="card" id="productFormCard" style="display:none;">
+                <h3 style="margin-bottom:16px;" id="formTitle">Add New Product</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input type="text" id="pTitle" placeholder="Course / Video Title">
+                    </div>
+                    <div class="form-group">
+                        <label>Price (₹) *</label>
+                        <input type="number" id="pPrice" placeholder="499">
+                    </div>
+                    <div class="form-group full">
+                        <label>Description</label>
+                        <textarea id="pDesc" placeholder="Full HD Video Course with Lifetime Access"></textarea>
+                    </div>
+
+                    <!-- Media Type -->
+                    <div class="form-group full">
+                        <label>Media Type</label>
+                        <div style="display:flex; gap:20px; margin-top:6px;">
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="radio" name="mediaType" value="image" checked onchange="toggleMediaFields()">
+                                Images
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="radio" name="mediaType" value="video" onchange="toggleMediaFields()">
+                                Video / MP3
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group full" id="imageField">
+                        <label>Paste Image Link</label>
+                        <input type="text" id="pImage" placeholder="https://example.com/image.jpg">
+                    </div>
+
+                    <div class="form-group full" id="videoField" style="display:none;">
+                        <label>Paste Video / MP3 Link</label>
+                        <input type="text" id="pVideo" placeholder="https://example.com/video.mp4 or .mp3">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Premium Group Link *</label>
+                        <input type="text" id="pGroup" placeholder="https://t.me/+xxxx">
+                    </div>
+                    <div class="form-group">
+                        <label>Validity</label>
+                        <input type="text" id="pValidity" placeholder="Lifetime / 30 Days" value="Lifetime">
+                    </div>
+                    <div class="form-group">
+                        <label>Tags (comma separated)</label>
+                        <input type="text" id="pTags" placeholder="Premium,VIP" value="Premium">
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:8px;">
+                    <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+                    <button class="btn btn-ghost" onclick="closeProductForm()">Cancel</button>
+                </div>
+                <input type="hidden" id="editProductId">
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Price</th>
+                            <th>Type</th>
+                            <th>Validity</th>
+                            <th>Tags</th>
+                            <th>Views</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Orders -->
+        <div class="page" id="page-orders">
+            <div class="page-title">Orders / UTR Verification</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Amount</th>
+                            <th>UTR</th>
+                            <th>User</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="page" id="page-settings">
+            <div class="page-title">Settings</div>
+            <div class="card">
+                <div class="form-group">
+                    <label>Mini App Name</label>
+                    <input type="text" id="sAppName" placeholder="Premium Group Hub">
+                </div>
+                <div class="form-group">
+                    <label>UPI ID *</label>
+                    <input type="text" id="sUpi" placeholder="yourname@paytm / number@ybl">
+                </div>
+                <div class="form-group">
+                    <label>QR Image Link (optional)</label>
+                    <input type="text" id="sQrImage" placeholder="https://... (empty = auto generate QR)">
+                </div>
+                <div class="form-group">
+                    <label>PhonePe Payment Link (optional)</label>
+                    <input type="text" id="sPhonePe" placeholder="https://phon.pe/xxxxx">
+                </div>
+                <div class="form-group">
+                    <label>Telegram Username / Bot (Send Proof)</label>
+                    <input type="text" id="sSupportTg" placeholder="your_username or YourBot (bin without @)">
+                </div>
+                <div class="form-group">
+                    <label>Bill Description</label>
+                    <input type="text" id="sBill" placeholder="Digital Course Access">
+                </div>
+                <div class="form-group">
+                    <label>Admin Password</label>
+                    <input type="text" id="sPass" placeholder="Change password">
+                </div>
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let editingId = null;
+
+        function toggleMediaFields() {
+            const type = document.querySelector('input[name="mediaType"]:checked').value;
+            document.getElementById('imageField').style.display = type === 'image' ? 'block' : 'none';
+            document.getElementById('videoField').style.display = type === 'video' ? 'block' : 'none';
+        }
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/admin/check');
+                const data = await res.json();
+                if (data.logged_in) {
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    loadDashboard();
+                }
+            } catch (e) {
+                console.log('Auth check failed, showing login');
+            }
+        }
+
+        async function doLogin() {
+            const password = document.getElementById('loginPassword').value;
+            const res = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({password})
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                loadDashboard();
+            } else {
+                document.getElementById('loginError').textContent = 'Wrong password';
+            }
+        }
+
+        async function doLogout() {
+            await fetch('/api/admin/logout', {method: 'POST'});
+            location.reload();
+        }
+
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+
+            if (page === 'dashboard') loadDashboard();
+            if (page === 'products') loadProducts();
+            if (page === 'orders') loadOrders();
+            if (page === 'settings') loadSettings();
+        }
+
+        async function loadDashboard() {
+            const res = await fetch('/api/admin/dashboard');
+            if (res.status === 401) return doLogout();
+            const d = await res.json();
+            document.getElementById('statToday').textContent = '₹' + Number(d.today_earning).toLocaleString('en-IN');
+            document.getElementById('statWeek').textContent = '₹' + Number(d.week_earning).toLocaleString('en-IN');
+            document.getElementById('statTotal').textContent = '₹' + Number(d.total_earning).toLocaleString('en-IN');
+            document.getElementById('statPending').textContent = d.pending_orders;
+            document.getElementById('statViews').textContent = d.total_views;
+            document.getElementById('statProducts').textContent = d.total_products;
+        }
+
+        async function loadProducts() {
+            const res = await fetch('/api/admin/products');
+            const products = await res.json();
+            const tbody = document.getElementById('productsTable');
+            tbody.innerHTML = products.map(p => `
+                <tr>
+                    <td>${p.id}</td>
+                    <td><strong>${p.title}</strong></td>
+                    <td>₹${Number(p.price).toLocaleString('en-IN')}</td>
+                    <td>${p.media_type === 'video' ? '🎬 Video' : '🖼️ Image'}</td>
+                    <td>${p.validity || '—'}</td>
+                    <td>${p.tags || '—'}</td>
+                    <td>${p.views || 0}</td>
+                    <td>
+                        <button class="btn btn-sm btn-ghost" onclick="editProduct(${p.id})">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="8" style="text-align:center;color:#666;">No products yet</td></tr>';
+        }
+
+        function openProductForm() {
+            editingId = null;
+            document.getElementById('formTitle').textContent = 'Add New Product';
+            document.getElementById('pTitle').value = '';
+            document.getElementById('pPrice').value = '';
+            document.getElementById('pDesc').value = '';
+            document.getElementById('pImage').value = '';
+            document.getElementById('pVideo').value = '';
+            document.getElementById('pGroup').value = '';
+            document.getElementById('pValidity').value = 'Lifetime';
+            document.getElementById('pTags').value = 'Premium';
+            document.querySelector('input[name="mediaType"][value="image"]').checked = true;
+            toggleMediaFields();
+            document.getElementById('productFormCard').style.display = 'block';
+        }
+
+        function closeProductForm() {
+            document.getElementById('productFormCard').style.display = 'none';
+        }
+
+        async function editProduct(id) {
+            const res = await fetch('/api/admin/products');
+            const products = await res.json();
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            editingId = id;
+            document.getElementById('formTitle').textContent = 'Edit Product';
+            document.getElementById('pTitle').value = p.title;
+            document.getElementById('pPrice').value = p.price;
+            document.getElementById('pDesc').value = p.description || '';
+            document.getElementById('pImage').value = p.image_url || '';
+            document.getElementById('pVideo').value = p.video_url || '';
+            document.getElementById('pGroup').value = p.group_link || '';
+            document.getElementById('pValidity').value = p.validity || 'Lifetime';
+            document.getElementById('pTags').value = p.tags || 'Premium';
+
+            const mediaType = p.media_type || 'image';
+            document.querySelector(`input[name="mediaType"][value="${mediaType}"]`).checked = true;
+            toggleMediaFields();
+
+            document.getElementById('productFormCard').style.display = 'block';
+        }
+
+        async function saveProduct() {
+            const mediaType = document.querySelector('input[name="mediaType"]:checked').value;
+            const payload = {
+                title: document.getElementById('pTitle').value.trim(),
+                price: document.getElementById('pPrice').value,
+                description: document.getElementById('pDesc').value.trim(),
+                image_url: document.getElementById('pImage').value.trim(),
+                video_url: document.getElementById('pVideo').value.trim(),
+                media_type: mediaType,
+                group_link: document.getElementById('pGroup').value.trim(),
+                validity: document.getElementById('pValidity').value.trim() || 'Lifetime',
+                tags: document.getElementById('pTags').value.trim() || 'Premium',
+                is_active: true
+            };
+            if (!payload.title || !payload.price) {
+                alert('Title and Price required');
+                return;
+            }
+
+            const url = editingId ? `/api/admin/products/${editingId}` : '/api/admin/products';
+            const method = editingId ? 'PUT' : 'POST';
+
+            await fetch(url, {
+                method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            closeProductForm();
+            loadProducts();
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Delete this product?')) return;
+            await fetch(`/api/admin/products/${id}`, {method: 'DELETE'});
+            loadProducts();
+        }
+
+        async function loadOrders() {
+            const res = await fetch('/api/admin/orders');
+            const orders = await res.json();
+            const tbody = document.getElementById('ordersTable');
+            tbody.innerHTML = orders.map(o => {
+                const statusClass = o.status === 'approved' ? 'badge-approved' : o.status === 'rejected' ? 'badge-rejected' : 'badge-pending';
+                const actions = o.status === 'pending' ? `
+                    <button class="btn btn-sm btn-success" onclick="approveOrder(${o.id})">Approve</button>
+                    <button class="btn btn-sm btn-danger" onclick="rejectOrder(${o.id})">Reject</button>
+                ` : '—';
+                return `
+                <tr>
+                    <td>${o.id}</td>
+                    <td>${o.product_title || '—'}</td>
+                    <td>₹${Number(o.amount).toLocaleString('en-IN')}</td>
+                    <td><code>${o.utr}</code></td>
+                    <td style="font-size:0.8rem;">${o.telegram_user || '—'}</td>
+                    <td><span class="badge ${statusClass}">${o.status}</span></td>
+                    <td style="font-size:0.8rem;">${o.created_at?.slice(0,16) || ''}</td>
+                    <td>${actions}</td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="8" style="text-align:center;color:#666;">No orders yet</td></tr>';
+        }
+
+        async function approveOrder(id) {
+            const res = await fetch(`/api/admin/orders/${id}/approve`, {method: 'POST'});
+            const data = await res.json();
+            if (data.success) {
+                alert('Approved! Group link will be shown to user.');
+                loadOrders();
+                loadDashboard();
+            }
+        }
+
+        async function rejectOrder(id) {
+            if (!confirm('Reject this UTR?')) return;
+            await fetch(`/api/admin/orders/${id}/reject`, {method: 'POST'});
+            loadOrders();
+        }
+
+        async function loadSettings() {
+            const res = await fetch('/api/admin/settings');
+            if (res.status === 401) return doLogout();
+            const s = await res.json();
+            document.getElementById('sAppName').value = s.mini_app_name || '';
+            document.getElementById('sUpi').value = s.upi_id || '';
+            document.getElementById('sQrImage').value = s.qr_image_url || '';
+            document.getElementById('sPhonePe').value = s.phonepe_link || '';
+            document.getElementById('sSupportTg').value = (s.support_telegram || 'admin').replace('@','');
+            document.getElementById('sBill').value = s.bill_description || '';
+            document.getElementById('sPass').value = s.admin_password || '';
+        }
+
+        async function saveSettings() {
+            const payload = {
+                mini_app_name: document.getElementById('sAppName').value.trim(),
+                upi_id: document.getElementById('sUpi').value.trim(),
+                qr_image_url: document.getElementById('sQrImage').value.trim(),
+                phonepe_link: document.getElementById('sPhonePe').value.trim(),
+                support_telegram: document.getElementById('sSupportTg').value.trim().replace('@','') || 'admin',
+                bill_description: document.getElementById('sBill').value.trim(),
+                admin_password: document.getElementById('sPass').value.trim()
+            };
+            const res = await fetch('/api/admin/settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                alert('Settings saved! Changes will reflect in Mini App.');
+            } else {
+                alert('Failed to save settings');
+            }
+        }
+
+        // Init
+        checkAuth();
+    </script>
+</body>
+</html>
