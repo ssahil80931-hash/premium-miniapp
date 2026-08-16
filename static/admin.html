@@ -6,12 +6,11 @@
     <title>Master Admin Dashboard</title>
     <style>
         :root {
-            --bg-body: #080b11;
-            --bg-card: #111827;
-            --bg-card-hover: #1f2937;
+            --bg-body: #05070b;
+            --bg-card: #0e131f;
             --accent: #00ff88;
             --accent-glow: rgba(0, 255, 136, 0.2);
-            --text-main: #f3f4f6;
+            --text-main: #ffffff;
             --text-muted: #9ca3af;
             --border: #1f2937;
         }
@@ -27,17 +26,16 @@
             background-color: var(--bg-body);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
             display: flex;
             justify-content: center;
         }
 
         .app-container {
             width: 100%;
-            max-width: 480px;
+            max-width: 440px;
         }
 
-        /* Login Screen */
         #login-screen {
             display: flex;
             flex-direction: column;
@@ -46,41 +44,44 @@
             text-align: center;
         }
 
-        .login-card {
+        .login-card, .section-card, .stat-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .login-title {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             color: #fff;
         }
 
-        .input-group {
-            margin-bottom: 16px;
+        .input-group, .form-row {
+            margin-bottom: 12px;
             text-align: left;
         }
 
-        .input-group label {
+        .form-row label, .input-group label {
             display: block;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
-            margin-bottom: 6px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .input-field {
             width: 100%;
-            background: #0b0f19;
+            background: #05070b;
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 12px 14px;
+            padding: 11px 14px;
             color: #fff;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
             transition: border-color 0.2s;
         }
@@ -92,14 +93,15 @@
         .btn {
             width: 100%;
             background: var(--accent);
-            color: #051911;
+            color: #05070b;
             border: none;
             border-radius: 12px;
-            padding: 14px;
-            font-weight: 700;
-            font-size: 14px;
+            padding: 13px;
+            font-weight: 800;
+            font-size: 13px;
             cursor: pointer;
             box-shadow: 0 4px 15px var(--accent-glow);
+            text-align: center;
             transition: transform 0.1s;
         }
 
@@ -107,7 +109,6 @@
             transform: scale(0.97);
         }
 
-        /* Dashboard Styles */
         #dashboard-screen {
             display: none;
         }
@@ -116,12 +117,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .header-title {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 17px;
+            font-weight: 800;
             color: #fff;
         }
 
@@ -129,50 +130,37 @@
             background: rgba(239, 68, 68, 0.15);
             color: #ef4444;
             border: 1px solid rgba(239, 68, 68, 0.3);
-            padding: 6px 14px;
+            padding: 6px 12px;
             border-radius: 8px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
         }
 
-        /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
         }
 
         .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 18px;
             text-align: center;
+            padding: 14px 10px;
+            margin-bottom: 0;
         }
 
         .stat-label {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 800;
             color: var(--accent);
-        }
-
-        /* Sections / Cards */
-        .section-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 18px;
-            margin-bottom: 16px;
         }
 
         .section-header {
@@ -185,9 +173,8 @@
             gap: 8px;
         }
 
-        /* Tables & Lists */
         .item-row {
-            background: #0b0f19;
+            background: #05070b;
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 12px;
@@ -199,7 +186,7 @@
 
         .item-info div:first-child {
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
             color: #fff;
             margin-bottom: 2px;
         }
@@ -218,24 +205,14 @@
             padding: 6px 10px;
             border-radius: 6px;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             border: none;
             cursor: pointer;
         }
 
         .btn-approve { background: rgba(0, 255, 136, 0.15); color: #00ff88; }
-        .btn-reject { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-
-        .form-row {
-            margin-bottom: 12px;
-        }
-
-        .form-row label {
-            font-size: 11px;
-            color: var(--text-muted);
-            display: block;
-            margin-bottom: 4px;
-        }
+        .btn-reject, .btn-del { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        .btn-edit { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
     </style>
 </head>
 <body>
@@ -267,15 +244,15 @@
             <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Total Revenue</div>
+                    <div class="stat-label">Revenue</div>
                     <div class="stat-value" id="statRevenue">₹0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Total Customers</div>
+                    <div class="stat-label">Buyers</div>
                     <div class="stat-value" id="statCustomers">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Pending Proofs</div>
+                    <div class="stat-label">Pending</div>
                     <div class="stat-value" id="statPending" style="color: #f59e0b;">0</div>
                 </div>
             </div>
@@ -288,9 +265,44 @@
                 </div>
             </div>
 
-            <!-- Products Management -->
+            <!-- Add / Edit Product Section -->
             <div class="section-card">
-                <div class="section-header">📦 Manage Products / Courses</div>
+                <div class="section-header" id="formHeading">➕ Add New Product / Video</div>
+                <input type="hidden" id="editProdId">
+                <div class="form-row">
+                    <label>Product / Video Title</label>
+                    <input type="text" id="prodTitle" class="input-field" placeholder="e.g. VIP Secret Course">
+                </div>
+                <div class="form-row">
+                    <label>Description / Subtitle</label>
+                    <input type="text" id="prodDesc" class="input-field" placeholder="e.g. Full HD Video + Lifetime Access">
+                </div>
+                <div class="form-row">
+                    <label>Price (₹)</label>
+                    <input type="text" id="prodPrice" class="input-field" placeholder="e.g. 199">
+                </div>
+                <div class="form-row">
+                    <label>Button Text (e.g. GET INSTANT ACCESS 🚀)</label>
+                    <input type="text" id="prodBtn" class="input-field" value="GET INSTANT ACCESS 🚀">
+                </div>
+                <div class="form-row">
+                    <label>Demo Video Direct URL (.mp4)</label>
+                    <input type="text" id="prodVideo" class="input-field" placeholder="https://example.com/video.mp4">
+                </div>
+                <div class="form-row">
+                    <label>Telegram VIP Group / Channel Invite Link</label>
+                    <input type="text" id="prodGroup" class="input-field" placeholder="https://t.me/+xyz_invite_link">
+                </div>
+                <div class="form-row">
+                    <label>Day Validity / Access duration</label>
+                    <input type="text" id="prodAccess" class="input-field" value="Lifetime">
+                </div>
+                <button class="btn" onclick="saveProduct()">SAVE / PUBLISH PRODUCT</button>
+            </div>
+
+            <!-- Products Management List -->
+            <div class="section-card">
+                <div class="section-header">📦 Existing Products & Videos</div>
                 <div id="productsContainer">
                     <div style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 10px;">Loading products...</div>
                 </div>
@@ -298,16 +310,16 @@
 
             <!-- Settings / UPI Config -->
             <div class="section-card">
-                <div class="section-header">⚙️ Payment Settings & UPI</div>
+                <div class="section-header">⚙️ UPI & Payment Settings</div>
                 <div class="form-row">
-                    <label>UPI ID</label>
-                    <input type="text" id="settingUpi" class="input-field">
+                    <label>UPI ID (For Payments)</label>
+                    <input type="text" id="settingUpi" class="input-field" placeholder="yourname@upi">
                 </div>
                 <div class="form-row">
-                    <label>Payment Note / Instructions</label>
-                    <input type="text" id="settingNote" class="input-field">
+                    <label>Payment Instructions Note</label>
+                    <input type="text" id="settingNote" class="input-field" placeholder="Scan QR & pay, then submit UTR below">
                 </div>
-                <button class="btn" style="margin-top: 8px; padding: 10px;" onclick="saveSettings()">SAVE SETTINGS</button>
+                <button class="btn" style="margin-top: 6px;" onclick="saveSettings()">UPDATE SETTINGS</button>
             </div>
         </div>
     </div>
@@ -358,7 +370,7 @@
                 // Render Orders
                 let ordersHtml = '';
                 if (!pendingOrders.length) {
-                    ordersHtml = '<div style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 10px;">No pending proofs</div>';
+                    ordersHtml = '<div style="color: var(--text-muted); font-size: 11px; text-align: center; padding: 10px;">No pending proofs</div>';
                 } else {
                     pendingOrders.forEach(o => {
                         ordersHtml += `
@@ -375,21 +387,29 @@
                         `;
                     });
                 }
-                document.getElementById('ordersContainer').innerText = '';
                 document.getElementById('ordersContainer').innerHTML = ordersHtml;
 
-                // Render Products
+                // Render Products List with Edit/Delete options
+                window.allProducts = data.products;
                 let prodHtml = '';
-                data.products.forEach(p => {
-                    prodHtml += `
-                        <div class="item-row">
-                            <div class="item-info">
-                                <div>${p.title}</div>
-                                <div>₹${p.price} | Access: ${p.day_access}</div>
+                if (!data.products.length) {
+                    prodHtml = '<div style="color: var(--text-muted); font-size: 11px; text-align: center; padding: 10px;">No products added yet</div>';
+                } else {
+                    data.products.forEach(p => {
+                        prodHtml += `
+                            <div class="item-row">
+                                <div class="item-info">
+                                    <div>${p.title}</div>
+                                    <div>₹${p.price} | Access: ${p.day_access || 'Lifetime'}</div>
+                                </div>
+                                <div class="action-btns">
+                                    <button class="btn-sm btn-edit" onclick="editProduct(${p.id})">Edit</button>
+                                    <button class="btn-sm btn-del" onclick="deleteProduct(${p.id})">Del</button>
+                                </div>
                             </div>
-                        </div>
-                    `;
-                });
+                        `;
+                    });
+                }
                 document.getElementById('productsContainer').innerHTML = prodHtml;
 
                 // Load Settings
@@ -399,6 +419,77 @@
             } catch (err) {
                 console.error(err);
             }
+        }
+
+        async function saveProduct() {
+            let id = document.getElementById('editProdId').value;
+            let title = document.getElementById('prodTitle').value.trim();
+            let description = document.getElementById('prodDesc').value.trim();
+            let price = document.getElementById('prodPrice').value.trim();
+            let btn_text = document.getElementById('prodBtn').value.trim();
+            let video_url = document.getElementById('prodVideo').value.trim();
+            let group_link = document.getElementById('prodGroup').value.trim();
+            let day_access = document.getElementById('prodAccess').value.trim();
+
+            if (!title || !price) {
+                alert('Please enter at least Title and Price');
+                return;
+            }
+
+            let payload = {
+                title, description, price, btn_text, video_url, group_link, day_access
+            };
+            if (id) payload.id = parseInt(id);
+
+            let res = await fetch('/api/admin/save-product', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            let data = await res.json();
+            if (data.status === 'success') {
+                alert('Product saved successfully!');
+                clearForm();
+                loadDashboard();
+            }
+        }
+
+        function editProduct(id) {
+            let p = window.allProducts.find(x => x.id === id);
+            if (!p) return;
+
+            document.getElementById('editProdId').value = p.id;
+            document.getElementById('prodTitle').value = p.title || '';
+            document.getElementById('prodDesc').value = p.description || '';
+            document.getElementById('prodPrice').value = p.price || '';
+            document.getElementById('prodBtn').value = p.btn_text || 'GET INSTANT ACCESS 🚀';
+            document.getElementById('prodVideo').value = p.video_url || '';
+            document.getElementById('prodGroup').value = p.group_link || '';
+            document.getElementById('prodAccess').value = p.day_access || 'Lifetime';
+            document.getElementById('formHeading').innerText = '✏️ Edit Product / Video (ID: ' + id + ')';
+            window.scrollTo({top: 400, behavior: 'smooth'});
+        }
+
+        function clearForm() {
+            document.getElementById('editProdId').value = '';
+            document.getElementById('prodTitle').value = '';
+            document.getElementById('prodDesc').value = '';
+            document.getElementById('prodPrice').value = '';
+            document.getElementById('prodBtn').value = 'GET INSTANT ACCESS 🚀';
+            document.getElementById('prodVideo').value = '';
+            document.getElementById('prodGroup').value = '';
+            document.getElementById('prodAccess').value = 'Lifetime';
+            document.getElementById('formHeading').innerText = '➕ Add New Product / Video';
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+            await fetch('/api/admin/delete-product', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id: id})
+            });
+            loadDashboard();
         }
 
         async function approveOrder(id) {
@@ -411,36 +502,26 @@
         }
 
         async function rejectOrder(id) {
-            await fetch('/api/admin/reject-order', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({order_id: id})
-            });
-            loadDashboard();
+            async function callReject() {
+                await fetch('/api/admin/reject-order', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({order_id: id})
+                });
+                loadDashboard();
+            }
+            callReject();
         }
 
         async function saveSettings() {
-            let upi = document.getElementById('settingUpi').value;
-            let note = document.getElementById('settingNote').value;
+            let upi_id = document.getElementById('settingUpi').value;
+            let payment_note = document.getElementById('settingNote').value;
 
             await fetch('/api/admin/update-settings', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    upi_id: upi,
-                    payment_note: note,
-                    admin_user: 'admin',
-                    admin_pass: 'admin123'
+                body: JSON.xml ? '' : JSON.stringify({
+                    upi_id, payment_note, admin_user: 'admin', admin_pass: 'admin123'
                 })
             });
-            alert('Settings saved successfully!');
-            loadDashboard();
-        }
-
-        // Auto login check
-        if (localStorage.getItem('admin_logged') === 'true') {
-            loadDashboard();
-        }
-    </script>
-</body>
-</html>
+            alert('UPI & Settings updated successfull
