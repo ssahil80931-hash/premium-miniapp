@@ -3,477 +3,414 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAZA KARLO - VIP Club</title>
+    <title>Velvet Club VIP Store</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { 
-            --club-pink: #ff007f; 
-            --club-purple: #7928ca; 
-            --bg: #0b060d; 
-            --card: rgba(25, 13, 30, 0.85); 
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
-        body { background: var(--bg); color: #fff; min-height: 100vh; overflow-x: hidden; position: relative; }
-
-        /* Romantic Club Glowing Background & Effects */
-        .club-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
-            background: radial-gradient(circle at 50% 20%, rgba(121, 40, 202, 0.25) 0%, transparent 60%),
-                        radial-gradient(circle at 20% 80%, rgba(255, 0, 127, 0.2) 0%, transparent 50%);
+        :root {
+            --bg-deep: #0b0710;
+            --bg-card: rgba(25, 17, 36, 0.75);
+            --accent-rose: #ff2a85;
+            --accent-purple: #9d4edd;
+            --text-main: #f3e8ff;
+            --text-sub: #b8a9c9;
+            --border-glow: rgba(255, 42, 133, 0.3);
         }
 
-        .toast { position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 12px 20px; border-radius: 12px; font-weight: bold; backdrop-filter: blur(10px); transition: all 0.4s ease; transform: translateY(-100px); opacity: 0; box-shadow: 0 0 25px rgba(255,0,127,0.5); }
-        .toast.show { transform: translateY(0); opacity: 1; }
-
-        /* Login & Admin Panel */
-        .login-wrap { position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-        .login-card { background: var(--card); border: 2px solid var(--club-pink); border-radius: 24px; padding: 35px 25px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 40px rgba(255, 0, 127, 0.3); backdrop-filter: blur(15px); }
-
-        .input-group { margin-bottom: 18px; text-align: left; }
-        .input-group label { display: block; font-size: 11px; color: var(--club-pink); margin-bottom: 6px; font-weight: bold; letter-spacing: 1px; }
-        .input-group input, .input-group textarea { width: 100%; padding: 12px; background: #050207; border: 1px solid rgba(255,0,127,0.3); border-radius: 10px; color: #fff; outline: none; }
-
-        .club-btn { background: linear-gradient(135deg, var(--club-pink), var(--club-purple)); color: #fff; font-weight: 800; border: none; padding: 14px; width: 100%; border-radius: 12px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: 0.2s; box-shadow: 0 4px 20px rgba(255,0,127,0.4); }
-        .club-btn:hover { transform: scale(1.02); }
-
-        .dash-wrap { position: relative; z-index: 10; max-width: 900px; margin: 0 auto; padding: 20px; display: none; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid rgba(255,0,127,0.4); padding-bottom: 12px; }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: var(--card); border: 1px solid rgba(255,0,127,0.2); padding: 18px; border-radius: 16px; text-align: center; backdrop-filter: blur(10px); }
-        .stat-val { font-size: 24px; font-weight: 800; color: #ff85c0; margin-top: 5px; }
-
-        .card { background: var(--card); border: 1px solid rgba(255,0,127,0.2); border-radius: 16px; padding: 20px; margin-bottom: 25px; backdrop-filter: blur(10px); }
-        h3 { color: #ff85c0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px; font-size: 16px; }
-
-        input, textarea, select { width: 100%; padding: 12px; background: #050207; border: 1px solid rgba(255,0,127,0.3); border-radius: 10px; color: #fff; margin-bottom: 12px; outline: none; }
-        .row { display: flex; gap: 12px; } .col { flex: 1; }
-
-        .btn-approve { background: #00ff9d; color: #000; padding: 6px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-reject { background: #ff4757; color: #fff; padding: 6px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-edit { background: #00d2ff; color: #000; padding: 6px 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-right: 4px; }
-        .btn-delete { background: #ff4757; color: #fff; padding: 6px 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .item-row { background: rgba(5,2,7,0.6); border: 1px solid rgba(255,255,255,0.06); padding: 14px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-
-        /* Client Store UI (Romantic Club Theme) */
-        #storeSection { position: relative; z-index: 10; max-width: 480px; margin: 0 auto; padding: 16px; display: none; }
-        .club-title-glow {
-            text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 2px;
-            background: linear-gradient(45deg, #fff, var(--club-pink), #ff85c0);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 25px rgba(255,0,127,0.6); margin-bottom: 6px;
-            animation: glowPulse 2s infinite alternate;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
-        @keyframes glowPulse {
-            0% { text-shadow: 0 0 15px rgba(255,0,127,0.4); }
-            100% { text-shadow: 0 0 35px rgba(255,0,127,0.9), 0 0 10px #fff; }
-        }
-        .club-subtitle { text-align: center; color: #bba4cc; font-size: 13px; margin-bottom: 24px; }
 
-        .product-card {
-            background: var(--card); border: 1px solid rgba(255,0,127,0.3); border-radius: 20px;
-            padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(12px);
+        body {
+            background-color: var(--bg-deep);
+            background-image: radial-gradient(circle at 50% 0%, #24113c 0%, var(--bg-deep) 70%);
+            color: var(--text-main);
+            min-height: 100vh;
+            /* Jelly Elastic Smooth Momentum Scrolling */
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            padding: 16px;
+            padding-bottom: 50px;
         }
-        .p-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-        .p-desc { font-size: 13px; color: #cbbad4; margin-bottom: 14px; line-height: 1.4; }
-        .p-meta { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; }
-        .p-price { font-size: 20px; font-weight: 800; color: #ff85c0; }
-        .access-badge { font-size: 11px; background: rgba(255,0,127,0.15); color: var(--club-pink); padding: 4px 10px; border-radius: 20px; font-weight: 600; border: 1px solid rgba(255,0,127,0.3); }
 
-        /* Modal Styles */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,2,7,0.9); z-index: 1000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
-        .modal-content { background: #130a17; border: 1px solid var(--club-pink); padding: 24px; border-radius: 24px; width: 100%; max-width: 360px; box-shadow: 0 0 40px rgba(255,0,127,0.4); }
+        .container {
+            max-width: 440px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-top: 10px;
+        }
+
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-rose), var(--accent-purple));
+            box-shadow: 0 0 25px rgba(255, 42, 133, 0.5);
+            margin-bottom: 12px;
+            font-size: 26px;
+            animation: pulseJelly 3s infinite ease-in-out;
+        }
+
+        @keyframes pulseJelly {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 42, 133, 0.4); }
+            50% { transform: scale(1.06); box-shadow: 0 0 35px rgba(255, 42, 133, 0.7); }
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #ff70a6, #ff2a85, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        p.subtitle {
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        /* Jelly Card Effect on Touch */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s;
+        }
+
+        .card:active {
+            transform: scale(0.97); /* Jelly squeeze feeling */
+        }
+
+        .product-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            background: rgba(255, 42, 133, 0.15);
+            color: #ff70a6;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 800;
+            border: 1px solid rgba(255, 42, 133, 0.3);
+        }
+
+        .product-desc {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .badge-tag {
+            display: inline-block;
+            font-size: 11px;
+            background: rgba(157, 78, 221, 0.2);
+            color: #d8b4fe;
+            padding: 3px 8px;
+            border-radius: 6px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(157, 78, 221, 0.3);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-rose), var(--accent-purple));
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 42, 133, 0.4);
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+        }
+
+        .btn:active {
+            transform: scale(0.94); /* Bouncy Jelly Click */
+        }
+
+        /* Modal Sheet */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 3, 8, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            justify-content: center;
+            align-items: flex-end;
+            animation: fadeInModal 0.3s ease;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: #150d22;
+            border: 1px solid var(--border-glow);
+            width: 100%;
+            max-width: 440px;
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent-rose);
+        }
+
+        .upi-box {
+            background: rgba(255, 42, 133, 0.08);
+            border: 1px dashed var(--accent-rose);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 14px;
+            font-size: 14px;
+        }
+
+        .loading, .error-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-sub);
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
-    <div class="club-bg"></div>
-    <div id="toastBox" class="toast"></div>
 
-    <!-- CLIENT STORE / MINI APP SECTION -->
-    <div id="storeSection">
-        <div style="padding-top:10px;">
-            <div class="club-title-glow">MAZA KARLO 💋</div>
-            <div class="club-subtitle">Exclusive VIP Private Club Pass & Content</div>
-        </div>
-        <div id="productsContainer">Loading VIP Passes...</div>
-    </div>
-
-    <!-- ADMIN LOGIN SECTION -->
-    <div id="loginSection" class="login-wrap">
-        <div class="login-card">
-            <div style="font-size:45px; margin-bottom:10px;">🔥</div>
-            <h2 style="color:var(--club-pink); margin-bottom:20px; letter-spacing:1px;">MAZA KARLO ADMIN</h2>
-            <div class="input-group">
-                <label>USERNAME</label>
-                <input type="text" id="admin_user_input" placeholder="Admin username">
-            </div>
-            <div class="input-group">
-                <label>PASSWORD</label>
-                <input type="password" id="admin_pass_input" placeholder="Password">
-            </div>
-            <button class="club-btn" onclick="attemptLogin()">ENTER CLUB</button>
-            <div style="margin-top:15px;"><a href="#" onclick="switchView('store')" style="color:#bba4cc; font-size:12px; text-decoration:none;">← Open Store Mini App</a></div>
-        </div>
-    </div>
-
-    <!-- ADMIN DASHBOARD SECTION -->
-    <div id="dashSection" class="dash-wrap">
+    <div class="container">
         <div class="header">
-            <h1 style="color:var(--club-pink); text-shadow: 0 0 15px var(--club-pink); font-size:20px;">🔥 MAZA KARLO CONTROL PANEL</h1>
-            <div>
-                <button class="club-btn" style="width:auto; padding:8px 14px; font-size:11px; margin-right:8px;" onclick="switchView('store')">VIEW STORE</button>
-                <button class="club-btn" style="width:auto; padding:8px 14px; font-size:11px; background:#444;" onclick="logout()">LOGOUT</button>
-            </div>
+            <div class="logo-badge">💋</div>
+            <h1>VELVET CLUB</h1>
+            <p class="subtitle">Exclusive VIP Private Passes & Community</p>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div>TOTAL REVENUE</div>
-                <div class="stat-val" id="total_revenue">₹0</div>
-            </div>
-            <div class="stat-card">
-                <div>TOTAL VISITS</div>
-                <div class="stat-val" id="total_visits" style="color:#00d2ff;">0</div>
-            </div>
-            <div class="stat-card">
-                <div>TOTAL BUYERS</div>
-                <div class="stat-val" id="total_buyers" style="color:#00ff9d;">0</div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>💳 Payment Approvals & Link Delivery</h3>
-            <div id="orders_list_box">Loading orders...</div>
-        </div>
-
-        <div class="card">
-            <h3 id="formTitle">🛍️ Add / Edit VIP Product</h3>
-            <input type="hidden" id="p_id">
-            <input type="text" id="p_title" placeholder="Product Title (e.g. VIP Pass)">
-            <textarea id="p_desc" placeholder="Product Description"></textarea>
-            <div class="row">
-                <div class="col"><input type="text" id="p_price" placeholder="Price (₹)"></div>
-                <div class="col"><input type="text" id="p_day" placeholder="Day Access (e.g. 30 Days / Lifetime)"></div>
-            </div>
-            <input type="text" id="p_btn" placeholder="Button Text (e.g. UNLOCK NOW 💋)">
-            <input type="text" id="p_video" placeholder="Demo Video URL (.mp4 file link or direct link)">
-            <input type="text" id="p_link" placeholder="Telegram Premium Group / Secret Link (Auto sent after approval)">
-            <div style="display:flex; gap:10px;">
-                <button class="club-btn" style="flex:2;" onclick="saveProduct()">SAVE PRODUCT</button>
-                <button class="club-btn" style="flex:1; background:#333;" onclick="resetForm()">RESET</button>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>📦 Existing Products</h3>
-            <div id="existing_products_box">Loading...</div>
-        </div>
-
-        <div class="card">
-            <h3>⚙️ Settings & QR Description Note</h3>
-            <div class="row">
-                <div class="col"><input type="text" id="adm_user" placeholder="Admin Username"></div>
-                <div class="col"><input type="text" id="adm_pass" placeholder="Admin Password"></div>
-            </div>
-            <div class="row">
-                <div class="col"><input type="text" id="upi_id" placeholder="UPI ID (e.g. your UPI)"></div>
-                <div class="col"><input type="text" id="qr_image" placeholder="QR Image URL (Optional)"></div>
-            </div>
-            <textarea id="payment_note" placeholder="Instructions below QR code (Edit description here)"></textarea>
-            <button class="club-btn" onclick="saveSettings()">UPDATE SETTINGS & NOTE</button>
+        <div id="store-container">
+            <div class="loading">Loading velvet experience...</div>
         </div>
     </div>
 
-    <!-- PAYMENT MODAL -->
+    <!-- Payment Modal -->
     <div id="payModal" class="modal">
         <div class="modal-content">
-            <h3 style="color:#ff85c0; border:none; margin-bottom:5px;">Complete VIP Payment</h3>
-            <p id="payNote" style="font-size:12px; color:#bba4cc; margin-bottom:15px;"></p>
-            <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:12px; border:1px solid rgba(255,0,127,0.2); margin-bottom:15px; display:flex; justify-content:space-between;">
-                <div><span style="font-size:10px; color:#888;">UPI ID</span><br><strong id="upiDisplay" style="color:#00d2ff;">...</strong></div>
-                <div style="text-align:right;"><span style="font-size:10px; color:#888;">AMOUNT</span><br><strong style="color:#00ff9d; font-size:16px;">₹<span id="amountDisplay">0</span></strong></div>
+            <div class="modal-title">
+                <span id="modalProdTitle">Complete Payment</span>
+                <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
-            <div class="input-group">
-                <label>12-DIGIT UTR / TRANSACTION ID</label>
-                <input type="text" id="utrInput" placeholder="Enter transaction reference" maxlength="12">
+            <div class="upi-box">
+                <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 4px;">Send payment to UPI ID:</div>
+                <strong id="displayUpi" style="color: #ff70a6; font-size: 16px; user-select: all;">loading...</strong>
             </div>
-            <button class="club-btn" onclick="submitOrder()">VERIFY & UNLOCK 🚀</button>
-            <button onclick="closeModal()" style="width:100%; background:transparent; border:none; color:#888; margin-top:10px; cursor:pointer; font-size:12px;">Cancel</button>
+            <p id="paymentNote" class="product-desc" style="font-size: 12px; text-align: center; margin-bottom: 14px;"></p>
+            
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 6px;">Enter 12-Digit UTR / Transaction ID:</label>
+                <input type="text" id="utrInput" class="input-field" placeholder="e.g. 4352xxxxxxxx">
+            </div>
+
+            <button class="btn" onclick="submitOrder()">VERIFY & SUBMIT PAYMENT</button>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <div style="font-size: 40px; margin-bottom: 10px;">🎉</div>
+            <h2 style="color: #fff; margin-bottom: 8px;">Payment Under Review</h2>
+            <p class="product-desc" style="margin-bottom: 20px;">Admin will verify your UTR shortly. Once approved, your VIP Telegram link will unlock automatically right here!</p>
+            <button class="btn" onclick="closeModal()">OKAY</button>
         </div>
     </div>
 
     <script>
-        const tg = window.Telegram?.WebApp;
-        if(tg) tg.expand();
+        let tg = window.Telegram.WebApp;
+        tg.expand();
 
-        function showToast(msg, isErr=false) {
-            const t = document.getElementById('toastBox');
-            t.style.background = isErr ? 'rgba(255,71,87,0.95)' : 'rgba(0,255,157,0.95)';
-            t.style.color = isErr ? '#fff' : '#000';
-            t.innerText = (isErr ? '⚠️ ' : '💖 ') + msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
+        let currentProductId = null;
+        let globalConfig = {};
+        let productsData = [];
 
-        function switchView(view) {
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('dashSection').style.display = 'none';
-            document.getElementById('storeSection').style.display = 'none';
-
-            if(view === 'store') {
-                document.getElementById('storeSection').style.display = 'block';
-                loadStore();
-            } else if(view === 'login') {
-                document.getElementById('loginSection').style.display = 'flex';
-            } else if(view === 'dash') {
-                document.getElementById('dashSection').style.display = 'block';
-                loadDashboard();
-            }
-        }
-
-        let storeConfig = {};
-        let selectedProdId = null;
-
-        async function loadStore() {
+        async function fetchStoreData() {
             try {
-                const res = await fetch('/api/data');
-                const data = await res.json();
-                storeConfig = data.config || {};
-                const container = document.getElementById('productsContainer');
-                container.innerHTML = '';
-
-                if(!data.products || data.products.length === 0) {
-                    container.innerHTML = '<div style="text-align:center; color:#888; padding:30px;">No VIP Passes available right now.</div>';
-                    return;
-                }
-
-                data.products.forEach(p => {
-                    let videoHtml = p.video_url ? `<video src="${p.video_url}" controls style="width:100%; max-height:160px; border-radius:10px; margin-bottom:12px; background:#000;" poster=""></video>` : '';
-                    container.innerHTML += `
-                        <div class="product-card">
-                            ${videoHtml}
-                            <div class="p-title">${p.title}</div>
-                            <div class="p-desc">${p.description}</div>
-                            <div style="margin-bottom:12px;"><span class="access-badge">⏳ Access: ${p.day_access || 'Lifetime'}</span></div>
-                            <div class="p-meta">
-                                <div class="p-price">₹${p.price}</div>
-                                <button class="club-btn" style="width:auto; padding:10px 18px; font-size:12px;" onclick="openPaymentModal(${p.id}, '${p.price}')">${p.btn_text || 'UNLOCK 💋'}</button>
-                            </div>
-                        </div>`;
-                });
-
-                // Check pending/approved status for Telegram user
-                const userId = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "test_user";
-                const statusRes = await fetch(`/api/order/check-status?user_id=${userId}`);
-                const statusData = await statusRes.json();
-                if(statusData.status === 'approved' && statusData.group_link) {
-                    container.innerHTML = `
-                        <div class="product-card" style="text-align:center; padding:30px;">
-                            <div style="font-size:40px; margin-bottom:10px;">🎉</div>
-                            <div class="p-title" style="color:#00ff9d;">VIP Access Approved!</div>
-                            <p class="p-desc">Your payment has been verified by the admin.</p>
-                            <a href="${statusData.group_link}" target="_blank" class="club-btn" style="display:block; text-decoration:none; margin-top:15px; padding:14px;">JOIN TELEGRAM CLUB LINK 🚀</a>
-                        </div>` + container.innerHTML;
-                } else if(statusData.status === 'pending') {
-                    showToast('Your payment verification is pending with admin...', false);
-                }
-            } catch(e) {
-                document.getElementById('productsContainer').innerHTML = '<div style="text-align:center; color:#888;">Failed to load store.</div>';
+                let res = await fetch('/api/data');
+                let data = await res.json();
+                productsData = data.products;
+                globalConfig = data.config;
+                renderStore();
+                checkUserExistingStatus();
+            } catch (err) {
+                document.getElementById('store-container').innerHTML = '<div class="error-state">Failed to load store. Please refresh.</div>';
             }
         }
 
-        function openPaymentModal(productId, price) {
-            selectedProdId = productId;
-            document.getElementById('amountDisplay').innerText = price;
-            document.getElementById('upiDisplay').innerText = storeConfig.upi_id || "club@upi";
-            document.getElementById('payNote').innerText = storeConfig.payment_note || "Scan QR and pay via any UPI app, then submit UTR.";
+        function renderStore() {
+            let container = document.getElementById('store-container');
+            if (!productsData.length) {
+                container.innerHTML = '<div class="error-state">No VIP passes available right now.</div>';
+                return;
+            }
+
+            let html = '';
+            productsData.forEach(p => {
+                html += `
+                    <div class="card">
+                        <div class="product-title">
+                            <span>${p.title}</span>
+                            <span class="product-price">₹${p.price}</span>
+                        </div>
+                        <div class="badge-tag">⏳ Access: ${p.day_access || 'Lifetime'}</div>
+                        <div class="product-desc">${p.description || ''}</div>
+                        <button class="btn" onclick="openCheckout(${p.id})">${p.btn_text || 'UNLOCK ACCESS 💋'}</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function openCheckout(productId) {
+            currentProductId = productId;
+            let prod = productsData.find(x => x.id === productId);
+            if (!prod) return;
+
+            document.getElementById('modalProdTitle').innerText = prod.title;
+            document.getElementById('displayUpi').innerText = globalConfig.upi_id || 'clubmaza@upi';
+            document.getElementById('paymentNote').innerText = globalConfig.payment_note || '';
             document.getElementById('payModal').style.display = 'flex';
         }
 
         function closeModal() {
             document.getElementById('payModal').style.display = 'none';
-            document.getElementById('utrInput').value = '';
+            document.getElementById('successModal').style.display = 'none';
         }
 
         async function submitOrder() {
-            const utr = document.getElementById('utrInput').value.trim();
-            if(!utr || utr.length < 6) {
-                showToast('Please enter a valid 12-digit UTR reference number!', true);
+            let utr = document.getElementById('utrInput').value.trim();
+            if (!utr || utr.length < 6) {
+                alert('Please enter a valid UTR / Transaction ID');
                 return;
             }
-            const userId = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "test_user_" + Math.floor(Math.random()*1000);
-            const userName = tg?.initDataUnsafe?.user?.first_name || "Club Member";
 
-            const res = await fetch('/api/order/submit', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ user_id: userId, user_name: userName, product_id: selectedProdId, utr_proof: utr })
-            });
-            const data = await res.json();
-            if(data.status === 'success') {
-                showToast('Payment submitted! Admin will verify soon.');
-                closeModal();
-                loadStore();
-            } else {
-                showToast('Submission failed!', true);
+            let userId = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : 'test_user_' + Math.floor(Math.random()*1000);
+            let userName = tg.initDataUnsafe?.user?.first_name || 'VIP Member';
+
+            try {
+                let res = await fetch('/api/order/submit', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        user_id: userId,
+                        user_name: userName,
+                        product_id: currentProductId,
+                        utr_proof: utr
+                    })
+                });
+                let data = await res.json();
+                if (data.status === 'success') {
+                    closeModal();
+                    document.getElementById('successModal').style.display = 'flex';
+                }
+            } catch (err) {
+                alert('Error submitting order. Try again.');
             }
         }
 
-        // Admin Actions
-        let cachedProducts = [];
+        async function checkUserExistingStatus() {
+            let userId = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : null;
+            if (!userId) return;
 
-        async function attemptLogin() {
-            const u = document.getElementById('admin_user_input').value;
-            const p = document.getElementById('admin_pass_input').value;
-            const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u, password:p}) });
-            const data = await res.json();
-            if(data.status === 'success') {
-                localStorage.setItem('mazakarlo_token', data.token);
-                showToast('Welcome to Club Admin!');
-                switchView('dash');
-            } else {
-                showToast('Invalid credentials!', true);
-            }
-        }
-
-        function logout() { localStorage.removeItem('mazakarlo_token'); switchView('login'); }
-
-        async function loadDashboard() {
-            const res = await fetch('/api/admin/dashboard');
-            const data = await res.json();
-
-            document.getElementById('total_revenue').innerText = '₹' + data.revenue;
-            document.getElementById('total_visits').innerText = data.total_visits;
-            document.getElementById('total_buyers').innerText = data.total_buyers;
-            document.getElementById('adm_user').value = data.admin_user;
-            document.getElementById('adm_pass').value = data.admin_pass;
-            document.getElementById('payment_note').value = data.payment_note;
-
-            const ordersBox = document.getElementById('orders_list_box');
-            ordersBox.innerHTML = data.orders.length === 0 ? '<div style="color:#777;">No orders received yet.</div>' : '';
-            data.orders.forEach(o => {
-                let badgeColor = o.status === 'approved' ? '#00ff9d' : (o.status === 'rejected' ? '#ff4757' : '#ffa500');
-                ordersBox.innerHTML += `
-                    <div class="item-row">
-                        <div>
-                            <strong>${o.user_name}</strong> (ID: ${o.user_id})<br>
-                            <small>Item: ${o.title} | ₹${o.price}</small><br>
-                            <small style="color:#00d2ff;">UTR: <b>${o.utr}</b></small> | <span style="color:${badgeColor}; font-weight:bold;">${o.status.toUpperCase()}</span>
+            try {
+                let res = await fetch(`/api/order/check-status?user_id=${userId}`);
+                let data = await res.json();
+                if (data.status === 'approved' && data.group_link) {
+                    document.getElementById('store-container').innerHTML = `
+                        <div class="card" style="text-align: center; padding: 30px;">
+                            <div style="font-size: 45px; margin-bottom: 12px;">👑</div>
+                            <h2 style="color: #fff; margin-bottom: 8px;">VIP Access Unlocked!</h2>
+                            <p class="product-desc" style="margin-bottom: 20px;">Your payment has been verified. Join the private velvet channel below:</p>
+                            <a href="${data.group_link}" target="_blank" class="btn">JOIN VIP TELEGRAM CHANNEL 🚀</a>
                         </div>
-                        <div>
-                            ${o.status === 'pending' ? `<button class="btn-approve" onclick="approveOrder(${o.id})">APPROVE</button> <button class="btn-reject" onclick="rejectOrder(${o.id})">REJECT</button>` : '<span style="font-size:12px; color:#888;">Completed</span>'}
-                        </div>
-                    </div>`;
-            });
-
-            cachedProducts = data.products;
-            const prodBox = document.getElementById('existing_products_box');
-            prodBox.innerHTML = cachedProducts.length === 0 ? '<div style="color:#777;">No products added.</div>' : '';
-            cachedProducts.forEach(p => {
-                prodBox.innerHTML += `
-                    <div class="item-row">
-                        <div>
-                            <strong>${p.title}</strong> - <span style="color:#ff85c0;">₹${p.price}</span> (${p.day_access})<br>
-                            <small style="color:#888;">Link: ${p.group_link ? 'Configured' : 'Missing'}</small>
-                        </div>
-                        <div>
-                            <button class="btn-edit" onclick="editProduct(${p.id})">EDIT</button>
-                            <button class="btn-delete" onclick="deleteProduct(${p.id})">DEL</button>
-                        </div>
-                    </div>`;
-            });
-
-            const cfgRes = await fetch('/api/data');
-            const cfgData = await cfgRes.json();
-            document.getElementById('upi_id').value = cfgData.config.upi_id;
-            document.getElementById('qr_image').value = cfgData.config.qr_image;
+                    `;
+                }
+            } catch (e) {}
         }
 
-        function editProduct(id) {
-            const p = cachedProducts.find(x => x.id === id);
-            if(!p) return;
-            document.getElementById('p_id').value = p.id;
-            document.getElementById('p_title').value = p.title;
-            document.getElementById('p_desc').value = p.description;
-            document.getElementById('p_price').value = p.price;
-            document.getElementById('p_day').value = p.day_access;
-            document.getElementById('p_btn').value = p.btn_text;
-            document.getElementById('p_video').value = p.video_url;
-            document.getElementById('p_link').value = p.group_link;
-            document.getElementById('formTitle').innerText = '✏️ Edit VIP Product';
-            window.scrollTo({top: document.getElementById('formTitle').offsetTop - 20, behavior:'smooth'});
-        }
-
-        function resetForm() {
-            document.getElementById('p_id').value = '';
-            document.getElementById('p_title').value = '';
-            document.getElementById('p_desc').value = '';
-            document.getElementById('p_price').value = '';
-            document.getElementById('p_day').value = '';
-            document.getElementById('p_btn').value = '';
-            document.getElementById('p_video').value = '';
-            document.getElementById('p_link').value = '';
-            document.getElementById('formTitle').innerText = '🛍️ Add / Edit VIP Product';
-        }
-
-        async function saveProduct() {
-            const p = {
-                id: document.getElementById('p_id').value ? parseInt(document.getElementById('p_id').value) : null,
-                title: document.getElementById('p_title').value,
-                description: document.getElementById('p_desc').value,
-                price: document.getElementById('p_price').value,
-                day_access: document.getElementById('p_day').value,
-                btn_text: document.getElementById('p_btn').value,
-                video_url: document.getElementById('p_video').value,
-                group_link: document.getElementById('p_link').value
-            };
-            if(!p.title || !p.price) return showToast('Title and Price are required!', true);
-
-            await fetch('/api/admin/save-product', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(p) });
-            showToast('Product saved successfully!');
-            resetForm();
-            loadDashboard();
-        }
-
-        async function deleteProduct(id) {
-            if(!confirm('Delete this product?')) return;
-            await fetch('/api/admin/delete-product', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id: id}) });
-            showToast('Product deleted!');
-            loadDashboard();
-        }
-
-        async function approveOrder(id) {
-            await fetch('/api/admin/approve-order', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({order_id: id}) });
-            showToast('Order Approved & Link Unlocked for User!');
-            loadDashboard();
-        }
-
-        async function rejectOrder(id) {
-            await fetch('/api/admin/reject-order', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({order_id: id}) });
-            showToast('Order Rejected!', true);
-            loadDashboard();
-        }
-
-        async function saveSettings() {
-            const s = {
-                upi_id: document.getElementById('upi_id').value,
-                qr_image: document.getElementById('qr_image').value,
-                theme_color: "#ff007f",
-                enable_animation: true,
-                admin_user: document.getElementById('adm_user').value,
-                admin_pass: document.getElementById('adm_pass').value,
-                payment_note: document.getElementById('payment_note').value
-            };
-            await fetch('/api/admin/update-settings', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(s) });
-            showToast('Settings & QR Description Updated!');
-        }
-
-        // On load check auth
-        if(localStorage.getItem('mazakarlo_token')) {
-            switchView('dash');
-        } else {
-            switchView('store');
-        }
+        fetchStoreData();
     </script>
 </body>
 </html>
