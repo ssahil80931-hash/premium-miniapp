@@ -3,525 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Admin Dashboard</title>
+    <title>Baba Jadugar Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #05070b;
-            --bg-card: #0e131f;
-            --accent: #00ff88;
-            --accent-glow: rgba(0, 255, 136, 0.2);
-            --text-main: #ffffff;
-            --text-muted: #9ca3af;
-            --border: #1f2937;
+            --bg: #08080d;
+            --sidebar: #0f0f16;
+            --card: #15151f;
+            --card2: #1c1c28;
+            --gold: #f5c542;
+            --gold-dim: rgba(245,197,66,0.15);
+            --green: #00e676;
+            --blue: #4facfe;
+            --red: #ff4757;
+            --text: #eeeef5;
+            --muted: #8b8ba0;
+            --border: rgba(255,255,255,0.07);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 16px;
             display: flex;
-            justify-content: center;
         }
 
-        .app-container {
-            width: 100%;
-            max-width: 440px;
-        }
-
-        #login-screen {
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            padding: 24px 16px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            min-height: 80vh;
-            text-align: center;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
         }
-
-        .login-card, .section-card, .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 18px;
-            margin-bottom: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .login-title {
-            font-size: 20px;
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.15rem;
             font-weight: 700;
-            margin-bottom: 18px;
-            color: #fff;
+            background: linear-gradient(90deg, var(--gold), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .logo-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 32px;
         }
 
-        .input-group, .form-row {
-            margin-bottom: 12px;
-            text-align: left;
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: var(--muted);
+            cursor: pointer;
+            margin-bottom: 6px;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: var(--gold-dim);
+            color: var(--gold);
+        }
+        .nav-item span { font-size: 1.15rem; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
         }
 
-        .form-row label, .input-group label {
-            display: block;
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-bottom: 5px;
+        /* Main */
+        .main {
+            flex: 1;
+            margin-left: 260px;
+            padding: 28px 32px;
+            min-height: 100vh;
+        }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), var(--green));
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
-        .input-field {
-            width: 100%;
-            background: #05070b;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 11px 14px;
-            color: #fff;
-            font-size: 13px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .input-field:focus {
-            border-color: var(--accent);
-        }
-
-        .btn {
-            width: 100%;
-            background: var(--accent);
-            color: #05070b;
-            border: none;
-            border-radius: 12px;
-            padding: 13px;
-            font-weight: 800;
-            font-size: 13px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px var(--accent-glow);
-            text-align: center;
-            transition: transform 0.1s;
-        }
-
-        .btn:active {
-            transform: scale(0.97);
-        }
-
-        #dashboard-screen {
-            display: none;
-        }
-
-        .header-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .header-title {
-            font-size: 17px;
-            font-weight: 800;
-            color: #fff;
-        }
-
-        .logout-btn {
-            background: rgba(239, 68, 68, 0.15);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .stat-card {
-            text-align: center;
-            padding: 14px 10px;
-            margin-bottom: 0;
-        }
-
-        .stat-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
         .stat-value {
-            font-size: 18px;
+            font-size: 1.7rem;
             font-weight: 800;
-            color: var(--accent);
         }
-
-        .section-header {
-            font-size: 14px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .item-row {
-            background: #05070b;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .item-info div:first-child {
-            font-size: 13px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 2px;
-        }
-
-        .item-info div:last-child {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 6px;
-        }
-
-        .btn-sm {
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-approve { background: rgba(0, 255, 136, 0.15); color: #00ff88; }
-        .btn-reject, .btn-del { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-        .btn-edit { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
-    </style>
-</head>
-<body>
-
-    <div class="app-container">
-        <!-- Login Screen -->
-        <div id="login-screen">
-            <div class="login-card">
-                <div class="login-title">🔒 Admin Portal</div>
-                <div class="input-group">
-                    <label>Username</label>
-                    <input type="text" id="username" class="input-field" placeholder="Enter username">
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="password" class="input-field" placeholder="Enter password">
-                </div>
-                <button class="btn" onclick="handleLogin()">LOGIN</button>
-            </div>
-        </div>
-
-        <!-- Dashboard Screen -->
-        <div id="dashboard-screen">
-            <div class="header-flex">
-                <div class="header-title">⚡ Master Admin Panel</div>
-                <button class="logout-btn" onclick="logout()">Logout</button>
-            </div>
-
-            <!-- Stats -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Revenue</div>
-                    <div class="stat-value" id="statRevenue">₹0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Buyers</div>
-                    <div class="stat-value" id="statCustomers">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Pending</div>
-                    <div class="stat-value" id="statPending" style="color: #f59e0b;">0</div>
-                </div>
-            </div>
-
-            <!-- Pending Orders / Approvals -->
-            <div class="section-card">
-                <div class="section-header">💳 Pending UTR Approvals</div>
-                <div id="ordersContainer">
-                    <div style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 10px;">No pending proofs</div>
-                </div>
-            </div>
-
-            <!-- Add / Edit Product Section -->
-            <div class="section-card">
-                <div class="section-header" id="formHeading">➕ Add New Product / Video</div>
-                <input type="hidden" id="editProdId">
-                <div class="form-row">
-                    <label>Product / Video Title</label>
-                    <input type="text" id="prodTitle" class="input-field" placeholder="e.g. VIP Secret Course">
-                </div>
-                <div class="form-row">
-                    <label>Description / Subtitle</label>
-                    <input type="text" id="prodDesc" class="input-field" placeholder="e.g. Full HD Video + Lifetime Access">
-                </div>
-                <div class="form-row">
-                    <label>Price (₹)</label>
-                    <input type="text" id="prodPrice" class="input-field" placeholder="e.g. 199">
-                </div>
-                <div class="form-row">
-                    <label>Button Text (e.g. GET INSTANT ACCESS 🚀)</label>
-                    <input type="text" id="prodBtn" class="input-field" value="GET INSTANT ACCESS 🚀">
-                </div>
-                <div class="form-row">
-                    <label>Demo Video Direct URL (.mp4)</label>
-                    <input type="text" id="prodVideo" class="input-field" placeholder="https://example.com/video.mp4">
-                </div>
-                <div class="form-row">
-                    <label>Telegram VIP Group / Channel Invite Link</label>
-                    <input type="text" id="prodGroup" class="input-field" placeholder="https://t.me/+xyz_invite_link">
-                </div>
-                <div class="form-row">
-                    <label>Day Validity / Access duration</label>
-                    <input type="text" id="prodAccess" class="input-field" value="Lifetime">
-                </div>
-                <button class="btn" onclick="saveProduct()">SAVE / PUBLISH PRODUCT</button>
-            </div>
-
-            <!-- Products Management List -->
-            <div class="section-card">
-                <div class="section-header">📦 Existing Products & Videos</div>
-                <div id="productsContainer">
-                    <div style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 10px;">Loading products...</div>
-                </div>
-            </div>
-
-            <!-- Settings / UPI Config -->
-            <div class="section-card">
-                <div class="section-header">⚙️ UPI & Payment Settings</div>
-                <div class="form-row">
-                    <label>UPI ID (For Payments)</label>
-                    <input type="text" id="settingUpi" class="input-field" placeholder="yourname@upi">
-                </div>
-                <div class="form-row">
-                    <label>Payment Instructions Note</label>
-                    <input type="text" id="settingNote" class="input-field" placeholder="Scan QR & pay, then submit UTR below">
-                </div>
-                <button class="btn" style="margin-top: 6px;" onclick="saveSettings()">UPDATE SETTINGS</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        async function handleLogin() {
-            let u = document.getElementById('username').value.trim();
-            let p = document.getElementById('password').value.trim();
-
-            try {
-                let res = await fetch('/api/admin/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({username: u, password: p})
-                });
-                let data = await res.json();
-                if (data.status === 'success') {
-                    localStorage.setItem('admin_logged', 'true');
-                    loadDashboard();
-                } else {
-                    alert('Invalid Username or Password');
-                }
-            } catch (err) {
-                alert('Login failed');
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('admin_logged');
-            document.getElementById('dashboard-screen').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
-        }
-
-        async function loadDashboard() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('dashboard-screen').style.display = 'block';
-
-            try {
-                let res = await fetch('/api/admin/dashboard');
-                let data = await res.json();
-
-                document.getElementById('statRevenue').innerText = `₹${data.revenue}`;
-                document.getElementById('statCustomers').innerText = data.total_buyers || 0;
-                
-                let pendingOrders = data.orders.filter(o => o.status === 'pending');
-                document.getElementById('statPending').innerText = pendingOrders.length;
-
-                // Render Orders
-                let ordersHtml = '';
-                if (!pendingOrders.length) {
-                    ordersHtml = '<div style="color: var(--text-muted); font-size: 11px; text-align: center; padding: 10px;">No pending proofs</div>';
-                } else {
-                    pendingOrders.forEach(o => {
-                        ordersHtml += `
-                            <div class="item-row">
-                                <div class="item-info">
-                                    <div>${o.user_name} (${o.title})</div>
-                                    <div>UTR: <b>${o.utr}</b> | ₹${o.price}</div>
-                                </div>
-                                <div class="action-btns">
-                                    <button class="btn-sm btn-approve" onclick="approveOrder(${o.id})">Approve</button>
-                                    <button class="btn-sm btn-reject" onclick="rejectOrder(${o.id})">Reject</button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-                document.getElementById('ordersContainer').innerHTML = ordersHtml;
-
-                // Render Products List with Edit/Delete options
-                window.allProducts = data.products;
-                let prodHtml = '';
-                if (!data.products.length) {
-                    prodHtml = '<div style="color: var(--text-muted); font-size: 11px; text-align: center; padding: 10px;">No products added yet</div>';
-                } else {
-                    data.products.forEach(p => {
-                        prodHtml += `
-                            <div class="item-row">
-                                <div class="item-info">
-                                    <div>${p.title}</div>
-                                    <div>₹${p.price} | Access: ${p.day_access || 'Lifetime'}</div>
-                                </div>
-                                <div class="action-btns">
-                                    <button class="btn-sm btn-edit" onclick="editProduct(${p.id})">Edit</button>
-                                    <button class="btn-sm btn-del" onclick="deleteProduct(${p.id})">Del</button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-                document.getElementById('productsContainer').innerHTML = prodHtml;
-
-                // Load Settings
-                document.getElementById('settingUpi').value = data.upi_id || '';
-                document.getElementById('settingNote').value = data.payment_note || '';
-
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function saveProduct() {
-            let id = document.getElementById('editProdId').value;
-            let title = document.getElementById('prodTitle').value.trim();
-            let description = document.getElementById('prodDesc').value.trim();
-            let price = document.getElementById('prodPrice').value.trim();
-            let btn_text = document.getElementById('prodBtn').value.trim();
-            let video_url = document.getElementById('prodVideo').value.trim();
-            let group_link = document.getElementById('prodGroup').value.trim();
-            let day_access = document.getElementById('prodAccess').value.trim();
-
-            if (!title || !price) {
-                alert('Please enter at least Title and Price');
-                return;
-            }
-
-            let payload = {
-                title, description, price, btn_text, video_url, group_link, day_access
-            };
-            if (id) payload.id = parseInt(id);
-
-            let res = await fetch('/api/admin/save-product', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-            let data = await res.json();
-            if (data.status === 'success') {
-                alert('Product saved successfully!');
-                clearForm();
-                loadDashboard();
-            }
-        }
-
-        function editProduct(id) {
-            let p = window.allProducts.find(x => x.id === id);
-            if (!p) return;
-
-            document.getElementById('editProdId').value = p.id;
-            document.getElementById('prodTitle').value = p.title || '';
-            document.getElementById('prodDesc').value = p.description || '';
-            document.getElementById('prodPrice').value = p.price || '';
-            document.getElementById('prodBtn').value = p.btn_text || 'GET INSTANT ACCESS 🚀';
-            document.getElementById('prodVideo').value = p.video_url || '';
-            document.getElementById('prodGroup').value = p.group_link || '';
-            document.getElementById('prodAccess').value = p.day_access || 'Lifetime';
-            document.getElementById('formHeading').innerText = '✏️ Edit Product / Video (ID: ' + id + ')';
-            window.scrollTo({top: 400, behavior: 'smooth'});
-        }
-
-        function clearForm() {
-            document.getElementById('editProdId').value = '';
-            document.getElementById('prodTitle').value = '';
-            document.getElementById('prodDesc').value = '';
-            document.getElementById('prodPrice').value = '';
-            document.getElementById('prodBtn').value = 'GET INSTANT ACCESS 🚀';
-            document.getElementById('prodVideo').value = '';
-            document.getElementById('prodGroup').value = '';
-            document.getElementById('prodAccess').value = 'Lifetime';
-            document.getElementById('formHeading').innerText = '➕ Add New Product / Video';
-        }
-
-        async function deleteProduct(id) {
-            if (!confirm('Are you sure you want to delete this product?')) return;
-            await fetch('/api/admin/delete-product', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({id: id})
-            });
-            loadDashboard();
-        }
-
-        async function approveOrder(id) {
-            await fetch('/api/admin/approve-order', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({order_id: id})
-            });
-            loadDashboard();
-        }
-
-        async function rejectOrder(id) {
-            async function callReject() {
-                await fetch('/api/admin/reject-order', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({order_id: id})
-                });
-                loadDashboard();
-            }
-            callReject();
-        }
-
-        async function saveSettings() {
-            let upi_id = document.getElementById('settingUpi').value;
-            let payment_note = document.getElementById('settingNote').value;
-
-            await fetch('/api/admin/update-settings', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.xml ? '' : JSON.stringify({
-                    upi_id, payment_note, admin_user: 'admin', admin_pass: 'admin123'
-                })
-            });
-            alert('UPI & Settings updated successfull
+        .stat-value.green { color: var(--green); }
+        .stat-value.gold { color: var(--gold); }
+        
+... 
