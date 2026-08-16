@@ -276,3 +276,19 @@ def check_order_status(user_id: str):
     if row:
         return {"status": row["status"], "group_link": row["group_link"] if row["status"] == "approved" else ""}
     return {"status": "not_found"}
+
+from fastapi.responses import FileResponse
+import os
+
+@app.get("/")
+async def serve_index():
+    if os.path.exists("static/index.html"):
+        return FileResponse("static/index.html")
+    return {"detail": "Not Found"}
+
+@app.get("/admin")
+async def serve_admin():
+    if os.path.exists("static/admin.html"):
+        return FileResponse("static/admin.html")
+    return {"detail": "Not Found"}
+    
