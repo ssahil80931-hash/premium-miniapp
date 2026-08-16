@@ -3,277 +3,602 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Premium Electric Store</title>
+    <title>Premium Group Hub</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #0a0a0f;
+            --card: #12121a;
+            --card2: #1a1a25;
+            --gold: #f5c542;
+            --gold-glow: rgba(245, 197, 66, 0.35);
+            --green: #00e676;
+            --green-glow: rgba(0, 230, 118, 0.4);
+            --text: #f0f0f5;
+            --muted: #9a9ab0;
+            --border: rgba(255,255,255,0.08);
+            --danger: #ff4757;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #05050a;
-            color: #e0e0ff;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 16px;
-            padding-bottom: 50px;
             overflow-x: hidden;
+            background-image: 
+                radial-gradient(ellipse at 20% 20%, rgba(245,197,66,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0,230,118,0.05) 0%, transparent 50%);
+        }
+
+        /* Animated border box */
+        .glow-box {
             position: relative;
+            background: var(--card);
+            border-radius: 20px;
+            overflow: hidden;
         }
-
-        /* Mind Wire / Neural Background */
-        .wires {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(0, 255, 150, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(120, 0, 255, 0.06) 0%, transparent 40%);
-        }
-
-        .wire-line {
+        .glow-box::before {
+            content: '';
             position: absolute;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 170, 0.4), transparent);
-            height: 1px;
-            animation: wireMove 8s linear infinite;
-            opacity: 0.5;
+            inset: -2px;
+            background: linear-gradient(45deg, var(--gold), #ff6b6b, var(--green), #4facfe, var(--gold));
+            background-size: 400% 400%;
+            border-radius: 22px;
+            z-index: -1;
+            animation: borderGlow 6s ease infinite;
+            opacity: 0.7;
         }
-
-        @keyframes wireMove {
-            0% { transform: translateX(-100%); opacity: 0; }
-            20% { opacity: 0.6; }
-            80% { opacity: 0.6; }
-            100% { transform: translateX(100vw); opacity: 0; }
+        @keyframes borderGlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .header {
             text-align: center;
-            padding: 25px 0 30px;
+            padding: 24px 16px 12px;
             position: relative;
-            z-index: 2;
         }
-
         .header h1 {
-            font-size: 26px;
-            font-weight: 800;
-            background: linear-gradient(90deg, #00ff9d, #7b5cff, #00ff9d);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--gold), #fff, var(--gold));
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: shine 3s linear infinite;
-            text-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
             letter-spacing: 1px;
         }
-
         @keyframes shine {
             to { background-position: 200% center; }
         }
-
         .header p {
-            color: #8a8aaa;
-            font-size: 13px;
+            color: var(--muted);
+            font-size: 0.85rem;
             margin-top: 6px;
         }
 
-        .categories {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 13px;
-            position: relative;
-            z-index: 2;
+        .container {
+            padding: 0 14px 40px;
+            max-width: 480px;
+            margin: 0 auto;
         }
 
-        .card {
-            background: rgba(15, 15, 25, 0.85);
-            border-radius: 16px;
-            padding: 18px 12px;
-            text-align: center;
-            border: 1px solid rgba(0, 255, 170, 0.15);
+        /* Product Card */
+        .product-card {
+            background: var(--card);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 50px rgba(245,197,66,0.15);
+        }
+
+        .media-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/10;
+            overflow: hidden;
+            background: #000;
+        }
+        .media-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .product-card:hover .media-wrap img {
+            transform: scale(1.05);
+        }
+
+        .overlay-lock {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+        .lock-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 20px var(--gold-glow);
+            letter-spacing: 1px;
+            animation: pulseText 2s ease-in-out infinite;
+        }
+        @keyframes pulseText {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.03); }
+        }
+
+        .tags {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .tag-premium {
+            background: linear-gradient(135deg, #f5c542, #e6a800);
+            color: #000;
+        }
+        .tag-vip {
+            background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+            color: #1a1a2e;
+        }
+
+        .card-body {
+            padding: 16px 18px 20px;
+        }
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        .card-desc {
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.45;
+            margin-bottom: 14px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--green);
+            text-shadow: 0 0 15px var(--green-glow);
+        }
+        .validity {
+            font-size: 0.8rem;
+            color: var(--muted);
+            background: rgba(255,255,255,0.06);
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .btn-access {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 6px 25px var(--green-glow);
+            transition: all 0.25s;
             position: relative;
             overflow: hidden;
-            transition: all 0.25s ease;
         }
-
-        .card::before {
+        .btn-access::after {
             content: '';
             position: absolute;
             top: -50%;
-            left: -50%;
-            width: 200%;
+            left: -60%;
+            width: 40%;
             height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(0, 255, 170, 0.08),
-                transparent
-            );
-            transform: rotate(45deg);
-            animation: cardShine 6s linear infinite;
+            background: rgba(255,255,255,0.25);
+            transform: rotate(25deg);
+            transition: left 0.5s;
+        }
+        .btn-access:hover::after {
+            left: 120%;
+        }
+        .btn-access:active {
+            transform: scale(0.97);
         }
 
-        @keyframes cardShine {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) rotate(45deg); }
-        }
-
-        .card:active {
-            transform: scale(0.96);
-            border-color: #00ff9d;
-            box-shadow: 0 0 25px rgba(0, 255, 157, 0.35),
-                        inset 0 0 15px rgba(0, 255, 157, 0.1);
-        }
-
-        .card .emoji {
-            font-size: 30px;
-            margin-bottom: 8px;
-            filter: drop-shadow(0 0 6px rgba(0, 255, 170, 0.5));
-        }
-
-        .card .name {
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #d0d0ff;
-        }
-
-        .card .price {
-            color: #00ff9d;
-            font-weight: 700;
-            font-size: 15px;
-            text-shadow: 0 0 8px rgba(0, 255, 157, 0.5);
-        }
-
-        .claim-btn {
-            display: block;
-            width: 100%;
-            margin-top: 26px;
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
             padding: 16px;
-            background: linear-gradient(135deg, #00ff9d, #00c6ff);
-            color: #000;
-            font-size: 15px;
-            font-weight: 800;
+            animation: fadeIn 0.3s;
+        }
+        .modal-overlay.show { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal {
+            background: var(--card2);
+            border-radius: 24px 24px 16px 16px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px 20px;
+            border: 1px solid var(--border);
+            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .modal h2 {
+            font-size: 1.2rem;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+        .modal .sub {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .qr-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .qr-box img {
+            width: 200px;
+            height: 200px;
+            border-radius: 8px;
+        }
+
+        .bill-info {
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            font-size: 0.88rem;
+        }
+        .bill-info div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .bill-info div:last-child { margin-bottom: 0; }
+        .bill-info .label { color: var(--muted); }
+
+        .btn-pay {
+            width: 100%;
+            padding: 14px;
             border: none;
             border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2979ff, #00b0ff);
+            color: #fff;
+            margin-bottom: 14px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(41,121,255,0.35);
+            transition: transform 0.2s;
+        }
+        .btn-pay:active { transform: scale(0.97); }
+
+        .utr-section {
+            margin-top: 8px;
+        }
+        .utr-section label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        .utr-input {
+            width: 100%;
+            padding: 13px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            outline: none;
+        }
+        .utr-input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-glow);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold), #e6a800);
+            color: #000;
+            cursor: pointer;
+            box-shadow: 0 6px 20px var(--gold-glow);
+        }
+
+        .success-box {
             text-align: center;
-            position: relative;
-            z-index: 2;
-            box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
-            letter-spacing: 0.5px;
+            padding: 20px 10px;
+            display: none;
+        }
+        .success-box.show { display: block; }
+        .success-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+        .btn-group {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: #000;
+            font-weight: 700;
+            border-radius: 14px;
+            text-decoration: none;
+            box-shadow: 0 6px 25px var(--green-glow);
         }
 
-        .claim-btn:active {
-            transform: scale(0.97);
-            box-shadow: 0 0 30px rgba(0, 255, 157, 0.6);
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
         }
-
-        /* Electric spark dots */
-        .spark {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: #00ff9d;
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--gold);
             border-radius: 50%;
-            box-shadow: 0 0 6px #00ff9d;
-            animation: sparkFly 4s linear infinite;
-            opacity: 0;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
         }
 
-        @keyframes sparkFly {
-            0% { transform: translateY(0) scale(1); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100vh) scale(0); opacity: 0; }
-        }
+        /* Bottom safe area */
+        .safe-bottom { height: 20px; }
     </style>
 </head>
 <body>
-    <div class="wires">
-        <div class="wire-line" style="top: 15%; width: 60%; animation-delay: 0s;"></div>
-        <div class="wire-line" style="top: 35%; width: 80%; animation-delay: 2s;"></div>
-        <div class="wire-line" style="top: 55%; width: 50%; animation-delay: 4s;"></div>
-        <div class="wire-line" style="top: 75%; width: 70%; animation-delay: 1s;"></div>
-        <div class="wire-line" style="top: 90%; width: 40%; animation-delay: 3s;"></div>
-    </div>
-
-    <!-- floating sparks -->
-    <div class="spark" style="left: 10%; animation-delay: 0s;"></div>
-    <div class="spark" style="left: 30%; animation-delay: 1.2s;"></div>
-    <div class="spark" style="left: 50%; animation-delay: 0.6s;"></div>
-    <div class="spark" style="left: 70%; animation-delay: 2.1s;"></div>
-    <div class="spark" style="left: 85%; animation-delay: 1.7s;"></div>
-
     <div class="header">
-        <h1>⚡ PREMIUM STORE</h1>
-        <p>Electric • Neural • Exclusive</p>
+        <h1 id="appName">Premium Group Hub</h1>
+        <p>Exclusive Premium Access</p>
     </div>
 
-    <div class="categories">
-        <div class="card" onclick="openCategory(1)">
-            <div class="emoji">📚</div>
-            <div class="name">Collection 01</div>
-            <div class="price">₹129</div>
-        </div>
-        <div class="card" onclick="openCategory(2)">
-            <div class="emoji">🎨</div>
-            <div class="name">Collection 02</div>
-            <div class="price">₹49</div>
-        </div>
-        <div class="card" onclick="openCategory(3)">
-            <div class="emoji">💻</div>
-            <div class="name">Collection 03</div>
-            <div class="price">₹70</div>
-        </div>
-        <div class="card" onclick="openCategory(4)">
-            <div class="emoji">🎓</div>
-            <div class="name">Collection 04</div>
-            <div class="price">₹40</div>
-        </div>
-        <div class="card" onclick="openCategory(5)">
-            <div class="emoji">💎</div>
-            <div class="name">Collection 05</div>
-            <div class="price">₹149</div>
-        </div>
-        <div class="card" onclick="openCategory(6)">
-            <div class="emoji">🔥</div>
-            <div class="name">Collection 06</div>
-            <div class="price">₹199</div>
-        </div>
-        <div class="card" onclick="openCategory(7)">
-            <div class="emoji">⚡</div>
-            <div class="name">Collection 07</div>
-            <div class="price">₹249</div>
-        </div>
-        <div class="card" onclick="openCategory(8)">
-            <div class="emoji">👑</div>
-            <div class="name">Collection 08</div>
-            <div class="price">₹299</div>
+    <div class="container" id="productList">
+        <div class="loading">
+            <div class="spinner"></div>
+            Loading premium content...
         </div>
     </div>
 
-    <button class="claim-btn" onclick="claimOffer()">⚡ CLAIM ELECTRIC OFFER</button>
+    <div class="safe-bottom"></div>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            
+            <div id="paymentStep">
+                <h2 id="modalTitle">Get Full Access</h2>
+                <p class="sub" id="modalSub">Complete payment to unlock</p>
+
+                <div class="qr-box">
+                    <img id="qrImage" src="" alt="QR Code">
+                </div>
+
+                <div class="bill-info" id="billInfo">
+                    <div><span class="label">Amount</span> <strong id="billAmount">₹0</strong></div>
+                    <div><span class="label">UPI ID</span> <strong id="billUpi">—</strong></div>
+                    <div><span class="label">Description</span> <strong id="billDesc">Premium Access</strong></div>
+                </div>
+
+                <button class="btn-pay" id="payOnlineBtn" onclick="openUPI()">
+                    💳 Pay Online
+                </button>
+
+                <div class="utr-section">
+                    <label>After payment, enter UTR / Transaction ID</label>
+                    <input type="text" class="utr-input" id="utrInput" placeholder="Enter 12-digit UTR number" maxlength="22">
+                    <button class="btn-submit" onclick="submitUTR()">Verify & Unlock</button>
+                </div>
+            </div>
+
+            <div class="success-box" id="successStep">
+                <div class="success-icon">🎉</div>
+                <h2>Access Granted!</h2>
+                <p class="sub" style="margin-bottom:16px;">Your premium access is ready</p>
+                <a href="#" class="btn-group" id="groupLinkBtn" target="_blank">Join Premium Group</a>
+            </div>
+        </div>
+    </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        tg.setHeaderColor("#05050a");
-        tg.setBackgroundColor("#05050a");
-
-        function openCategory(id) {
-            tg.HapticFeedback.impactOccurred("light");
-            tg.showAlert("⚡ Collection " + id + "\n\nDemo + Payment soon...");
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            tg.setHeaderColor('#0a0a0f');
+            tg.setBackgroundColor('#0a0a0f');
         }
 
-        function claimOffer() {
-            tg.HapticFeedback.notificationOccurred("success");
-            tg.showAlert("⚡ Offer Claimed!\n\nFull access coming soon.");
+        let currentProduct = null;
+        let currentUpiLink = '';
+
+        async function loadApp() {
+            try {
+                // Settings
+                const setRes = await fetch('/api/settings');
+                const settings = await setRes.json();
+                if (settings.mini_app_name) {
+                    document.getElementById('appName').textContent = settings.mini_app_name;
+                    document.title = settings.mini_app_name;
+                }
+
+                // Products
+                const res = await fetch('/api/products');
+                const products = await res.json();
+                renderProducts(products);
+            } catch (e) {
+                document.getElementById('productList').innerHTML = `
+                    <div class="empty">
+                        <p>Unable to load. Please try again.</p>
+                    </div>`;
+            }
         }
-    </script>
-</body>
-</html>
+
+        function renderProducts(products) {
+            const container = document.getElementById('productList');
+            if (!products || products.length === 0) {
+                container.innerHTML = `<div class="empty"><p>No premium products available right now.</p></div>`;
+                return;
+            }
+
+            container.innerHTML = products.map(p => {
+                const tags = (p.tags || 'Premium').split(',').map(t => t.trim()).filter(Boolean);
+                const tagHtml = tags.map(t => {
+                    const cls = t.toLowerCase().includes('vip') ? 'tag-vip' : 'tag-premium';
+                    return `<span class="tag ${cls}">${t}</span>`;
+                }).join('');
+
+                return `
+                <div class="product-card glow-box">
+                    <div class="media-wrap">
+                        <img src="${p.image_url || 'https://via.placeholder.com/600x400/1a1a25/666?text=Premium'}" alt="${p.title}" loading="lazy">
+                        <div class="overlay-lock">
+                            <div class="lock-text">🔒 GET FULL ACCESS</div>
+                        </div>
+                        <div class="tags">${tagHtml}</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title">${p.title}</div>
+                        <div class="card-desc">${p.description || ''}</div>
+                        <div class="meta-row">
+                            <div class="price">₹${Number(p.price).toLocaleString('en-IN')}</div>
+                            <div class="validity">${p.validity || 'Lifetime'}</div>
+                        </div>
+                        <button class="btn-access" onclick="openPayment(${p.id})">
+                            🚀 Get Full Access
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function openPayment(productId) {
+            try {
+                const [prodRes, qrRes] = await Promise.all([
+                    fetch(`/api/product/${productId}`),
+                    fetch(`/api/qr/${productId}`)
+                ]);
+                const product = await prodRes.json();
+                const qrData = await qrRes.json();
+
+                currentProduct = product;
+                currentUpiLink = qrData.upi_link;
+
+                document.getElementById('modalTitle').textContent = product.title;
+                document.getElementById('modalSub').textContent = 'Pay & unlock instant access';
+                document.getElementById('qrImage').src = `data:image/png;base64,${qrData.qr_base64}`;
+                document.getElementById('billAmount').textContent = `₹${Number(product.price).toLocaleString('en-IN')}`;
+                document.getElementById('billUpi').textContent = qrData.upi_id;
+                document.getElementById('billDesc').textContent = qrData.bill_description || 'Premium Access';
+                document.getElementById('utrInput').value = '';
+
+                document.getElementById('paymentStep').style.display = 'block';
+                document.getElementById('successStep').classList.remove('show');
+                document.getElementById('paymentModal').classList.add('show');
+            } catch (e) {
+                alert('Failed to load payment details');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('paymentModal').classList.remove('show');
+        }
+
+        function openUPI() {
+            if (currentUpiLink) {
+                window.location.href = currentUpiLink;
+            }
+        }
+
+        async function submitUTR() {
+            const utr = document.getElementById('utrInput').value.trim();
+            if (!utr || utr.length < 8) {
+                alert('Please enter a valid UTR / Transactio
