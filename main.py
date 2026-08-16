@@ -1,8 +1,10 @@
 import sqlite3
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 from typing import Optional
+import os
 
 app = FastAPI()
 
@@ -12,7 +14,6 @@ def init_db():
     conn = sqlite3.connect("store_database.db")
     c = conn.cursor()
     
-    # Products table (Day access & video/group link included)
     c.execute("""CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
         title TEXT, 
@@ -23,7 +24,6 @@ def init_db():
         group_link TEXT,
         day_access TEXT)""")
         
-    # Config table (Romantic/Club theme, Admin Credentials, QR Note)
     c.execute("""CREATE TABLE IF NOT EXISTS config (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         upi_id TEXT,
@@ -34,7 +34,6 @@ def init_db():
         admin_pass TEXT,
         payment_note TEXT)""")
         
-    # Orders table
     c.execute("""CREATE TABLE IF NOT EXISTS orders (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id TEXT,
@@ -43,29 +42,25 @@ def init_db():
         utr TEXT,
         status TEXT DEFAULT 'pending')""")
 
-    # Analytics table (For real visit counts)
     c.execute("""CREATE TABLE IF NOT EXISTS analytics (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         visits INTEGER DEFAULT 0)""")
 
-    # Default Analytics Row
     c.execute("SELECT COUNT(*) FROM analytics")
     if c.fetchone()[0] == 0:
         c.execute("INSERT INTO analytics (visits) VALUES (0)")
 
-    # Default Config
     c.execute("SELECT COUNT(*) FROM config")
     if c.fetchone()[0] == 0:
         c.execute("""INSERT INTO config (upi_id, qr_image, theme_color, enable_animation, admin_user, admin_pass, payment_note)
                      VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                  ("clubmaza@upi", "", "#ff007f", True, "admin", "admin123", "💖 Scan QR & Pay via any UPI App, enter UTR below to unlock VIP Club access!"))
+                  ("clubmaza@upi", "", "#ff2a85", True, "admin", "admin123", "💖 Scan QR & pay via any UPI app, then submit your UTR below!"))
 
-    # Default Product
     c.execute("SELECT COUNT(*) FROM products")
     if c.fetchone()[0] == 0:
         c.execute("""INSERT INTO products (title, description, price, btn_text, video_url, group_link, day_access)
                      VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                  ("VIP Romantic Club Pass", "Exclusive access to private media & community.", "99", "UNLOCK NOW 💋", "", "https://t.me/+example_vip_link", "30 Days"))
+                  ("Velvet VIP Club Pass", "Exclusive private media, channels & direct community access.", "99", "UNLOCK ACCESS 💋", "", "https://t.me/+example_vip_link", "30 Days"))
 
     conn.commit()
     conn.close()
@@ -81,10 +76,10 @@ class ProductModel(BaseModel):
     title: str
     description: Optional[str] = ""
     price: str
-    btn_text: Optional[str] = "UNLOCK NOW 💋"
+    btn_text: Optional[str] = "UNLOCK ACCESS 💋"
     video_url: Optional[str] = ""
     group_link: Optional[str] = ""
-    day_access: Optional[str] = "Lifetime"
+    day_access: Optional[str] = "30 Days"
 
 class DeleteProductModel(BaseModel):
     id: int
@@ -95,7 +90,7 @@ class OrderActionModel(BaseModel):
 class SettingsModel(BaseModel):
     upi_id: str
     qr_image: Optional[str] = ""
-    theme_color: Optional[str] = "#ff007f"
+    theme_color: Optional[str] = "#ff2a85"
     enable_animation: Optional[bool] = True
     admin_user: str
     admin_pass: str
@@ -107,6 +102,17 @@ class OrderSubmitModel(BaseModel):
     product_id: int
     utr_proof: str
 
+@app.get("/")
+async def serve_index():
+    if os.path.exists("static/index.html"):
+        return FileResponse("static/index.html")
+    return HTMLResponse("<h1>Store Front Loading...</h1>", status_code=404)
+
+@app.get("/admin")
+async def serve_admin():
+    if os.path.exists("static/admin.html"):
+        return FileResponse("static/admin.html")
+    return HTMLResponse("<h1>Admin Panel Loading...</h1>", status_code=404)
 
 @app.post("/api/admin/login")
 def admin_login(data: AdminLogin):
@@ -116,22 +122,18 @@ def admin_login(data: AdminLogin):
     row = c.fetchone()
     conn.close()
     if row and data.username == row[0] and data.password == row[1]:
-        return {"status": "success", "token": "mazakarlo_secure_token"}
+        return {"status": "success", "token": "velvet_secure_token"}
     return {"status": "error", "message": "Invalid credentials"}
-
 
 @app.get("/api/admin/dashboard")
 def admin_dashboard():
     conn = sqlite3.connect("store_database.db")
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    
     c.execute("SELECT * FROM config LIMIT 1")
     config = c.fetchone()
-    
     c.execute("SELECT * FROM products")
     products = [dict(row) for row in c.fetchall()]
-    
     c.execute("""
         SELECT o.id, o.user_id, o.user_name, o.utr, o.status, p.title, p.price, p.group_link 
         FROM orders o 
@@ -139,20 +141,15 @@ def admin_dashboard():
         ORDER BY o.id DESC
     """)
     orders = [dict(row) for row in c.fetchall()]
-    
     c.execute("SELECT SUM(CAST(p.price AS INTEGER)) FROM orders o JOIN products p ON o.product_id = p.id WHERE o.status = 'approved'")
     rev = c.fetchone()[0]
     revenue = rev if rev else 0
-    
     c.execute("SELECT visits FROM analytics LIMIT 1")
     visits_row = c.fetchone()
     total_visits = visits_row[0] if visits_row else 0
-
     c.execute("SELECT COUNT(DISTINCT user_id) FROM orders WHERE status='approved'")
     total_buyers = c.fetchone()[0]
-    
     conn.close()
-    
     return {
         "revenue": revenue,
         "total_visits": total_visits,
@@ -161,9 +158,9 @@ def admin_dashboard():
         "products": products,
         "admin_user": config["admin_user"] if config else "admin",
         "admin_pass": config["admin_pass"] if config else "admin123",
-        "payment_note": config["payment_note"] if config else ""
+        "payment_note": config["payment_note"] if config else "",
+        "upi_id": config["upi_id"] if config else ""
     }
-
 
 @app.post("/api/admin/save-product")
 def save_product(p: ProductModel):
@@ -179,7 +176,6 @@ def save_product(p: ProductModel):
     conn.close()
     return {"status": "success"}
 
-
 @app.post("/api/admin/delete-product")
 def delete_product(data: DeleteProductModel):
     conn = sqlite3.connect("store_database.db")
@@ -188,7 +184,6 @@ def delete_product(data: DeleteProductModel):
     conn.commit()
     conn.close()
     return {"status": "success"}
-
 
 @app.post("/api/admin/approve-order")
 def approve_order(data: OrderActionModel):
@@ -199,7 +194,6 @@ def approve_order(data: OrderActionModel):
     conn.close()
     return {"status": "success"}
 
-
 @app.post("/api/admin/reject-order")
 def reject_order(data: OrderActionModel):
     conn = sqlite3.connect("store_database.db")
@@ -208,7 +202,6 @@ def reject_order(data: OrderActionModel):
     conn.commit()
     conn.close()
     return {"status": "success"}
-
 
 @app.post("/api/admin/update-settings")
 def update_settings(s: SettingsModel):
@@ -220,34 +213,27 @@ def update_settings(s: SettingsModel):
     conn.close()
     return {"status": "success"}
 
-
 @app.get("/api/data")
 def get_store_data():
     conn = sqlite3.connect("store_database.db")
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    
-    # Increment total visit count on mini app open
     c.execute("UPDATE analytics SET visits = visits + 1")
     conn.commit()
-    
     c.execute("SELECT * FROM products")
     products = [dict(row) for row in c.fetchall()]
-    
     c.execute("SELECT upi_id, qr_image, theme_color, payment_note FROM config LIMIT 1")
     cfg = c.fetchone()
     conn.close()
-    
     return {
         "products": products,
         "config": {
             "upi_id": cfg["upi_id"] if cfg else "",
             "qr_image": cfg["qr_image"] if cfg else "",
-            "theme_color": cfg["theme_color"] if cfg else "#ff007f",
+            "theme_color": cfg["theme_color"] if cfg else "#ff2a85",
             "payment_note": cfg["payment_note"] if cfg else ""
         }
     }
-
 
 @app.post("/api/order/submit")
 def submit_order(order: OrderSubmitModel):
@@ -258,7 +244,6 @@ def submit_order(order: OrderSubmitModel):
     conn.commit()
     conn.close()
     return {"status": "success", "order_status": "pending"}
-
 
 @app.get("/api/order/check-status")
 def check_order_status(user_id: str):
@@ -272,23 +257,7 @@ def check_order_status(user_id: str):
         WHERE o.user_id = ? ORDER BY o.id DESC LIMIT 1
     """, (user_id,))
     row = c.fetchone()
-    conn.save = conn.close()
+    conn.close()
     if row:
         return {"status": row["status"], "group_link": row["group_link"] if row["status"] == "approved" else ""}
     return {"status": "not_found"}
-
-from fastapi.responses import FileResponse
-import os
-
-@app.get("/")
-async def serve_index():
-    if os.path.exists("static/index.html"):
-        return FileResponse("static/index.html")
-    return {"detail": "Not Found"}
-
-@app.get("/admin")
-async def serve_admin():
-    if os.path.exists("static/admin.html"):
-        return FileResponse("static/admin.html")
-    return {"detail": "Not Found"}
-    
