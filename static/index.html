@@ -62,7 +62,7 @@
 
         function openModal(productId, price) {
             selectedProductId = productId;
-            document.getElementById('amountDisplayinnerText = price;
+            document.getElementById('amountDisplay').innerText = price;
             document.getElementById('upiIdDisplay').innerText = storeConfig.upi_id;
             document.getElementById('payNote').innerText = storeConfig.payment_note;
             document.getElementById('payModal').style.display = 'block';
@@ -80,7 +80,6 @@
                 return;
             }
 
-            // Telegram WebApp user mapping (Fallback to test user if outside telegram)
             const tg = window.Telegram?.WebApp;
             const userId = tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "test_user_123";
             const userName = tg?.initDataUnsafe?.user?.first_name || "Test User";
